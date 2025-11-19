@@ -636,22 +636,22 @@
             });
 
             // Add "+" button if we can add more profiles
-            if (savedProfiles.length < 4) {
-                const addBtn = document.createElement('button');
-                addBtn.type = 'button';
-                addBtn.className = 'px-3 py-2 text-sm font-medium rounded-lg bg-oak-100 text-oak-600 hover:bg-oak-200 flex items-center justify-center';
-                addBtn.innerHTML = '<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>';
-                addBtn.title = 'Add new business profile';
-                addBtn.addEventListener('click', addNewBusinessProfile);
-                selector.appendChild(addBtn);
-            }
+            // if (savedProfiles.length < 4) {
+            //     const addBtn = document.createElement('button');
+            //     addBtn.type = 'button';
+            //     addBtn.className = 'px-3 py-2 text-sm font-medium rounded-lg bg-oak-100 text-oak-600 hover:bg-oak-200 flex items-center justify-center';
+            //     addBtn.innerHTML = '<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>';
+            //     addBtn.title = 'Add new business profile';
+            //     addBtn.addEventListener('click', addNewBusinessProfile);
+            //     selector.appendChild(addBtn);
+            // }
 
             // If no profiles and selector is empty, show first business slot
             if (savedProfiles.length === 0) {
                 const btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'px-3 py-2 text-sm font-medium rounded-lg bg-oak-600 text-white';
-                btn.textContent = 'Business 1';
+                btn.textContent = 'Business Information';
                 btn.dataset.profile = '0';
                 btn.addEventListener('click', function() {
                     switchToProfile(0);
