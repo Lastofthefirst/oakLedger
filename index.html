@@ -146,9 +146,27 @@
         <!-- Header -->
         <header class="bg-oak-800 border-b border-oak-700">
             <div class="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-                <div class="text-center">
-                    <h1 class="text-3xl font-bold tracking-tight text-oak-50 sm:text-4xl">Oak Ledger</h1>
-                    <p class="mt-2 text-sm text-oak-200">Create professional invoices in seconds • Works offline</p>
+                <div class="flex flex-col items-center gap-4">
+                    <!-- Letterhead Upload Area -->
+                    <div id="letterheadContainer" class="w-full flex justify-center">
+                        <div class="bg-white rounded-lg px-8 py-6">
+                            <div id="letterheadUploadArea" class="border-2 border-dashed border-oak-200 rounded-lg px-6 py-4 text-center hover:border-oak-400 cursor-pointer transition-colors">
+                                <svg class="mx-auto h-12 w-12 text-oak-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                <p class="mt-2 text-sm text-oak-700">Click to upload letterhead</p>
+                                <p class="text-xs text-oak-500">PNG, JPG, SVG up to 2MB</p>
+                                <p class="text-xs text-oak-500 mt-1">Transparent or white background works best</p>
+                            </div>
+                            <img id="letterheadPreview" class="letterhead-preview hidden rounded-lg mt-2 mx-auto" alt="Letterhead">
+                        </div>
+                    </div>
+                    <input type="file" id="letterheadInput" accept="image/*">
+
+                    <div class="text-center">
+                        <h1 class="text-3xl font-bold tracking-tight text-oak-50 sm:text-4xl">Oak Ledger</h1>
+                        <p class="mt-2 text-sm text-oak-200">Create professional invoices in seconds • Works offline</p>
+                    </div>
                 </div>
             </div>
         </header>
@@ -180,7 +198,7 @@
             <!-- Import Mode Section -->
             <div id="importSection" class="hidden mb-6 space-y-4">
                 <!-- LLM Prompt Helper -->
-                <div class="rounded-lg bg-white border border-oak-300 shadow-lg fade-in">
+                <div class="rounded-lg bg-white border border-oak-200 shadow-lg fade-in">
                     <div class="border-b border-oak-200 px-6 py-4">
                         <h2 class="text-lg font-semibold text-oak-900">LLM Assistant</h2>
                         <p class="mt-1 text-sm text-oak-600">Paste invoice details below, then copy the prompt to use with an LLM</p>
@@ -189,7 +207,7 @@
                         <div>
                             <label for="llmInput" class="block text-sm font-medium text-oak-700 mb-2">Invoice Details (Plain Text)</label>
                             <textarea id="llmInput" rows="4" placeholder="Paste or type invoice details here (optional)..."
-                                class="block w-full rounded-lg border-oak-300 bg-white text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm"></textarea>
+                                class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm"></textarea>
                         </div>
                         <button id="copyPromptBtn" type="button"
                             class="w-full inline-flex items-center justify-center rounded-lg bg-oak-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-oak-700 focus:outline-none focus:ring-2 focus:ring-oak-500 focus:ring-offset-2 shadow">
@@ -203,7 +221,7 @@
                 </div>
 
                 <!-- JSON Import -->
-                <div class="rounded-lg bg-white border border-oak-300 shadow-lg fade-in">
+                <div class="rounded-lg bg-white border border-oak-200 shadow-lg fade-in">
                     <div class="border-b border-oak-200 px-6 py-4">
                         <h2 class="text-lg font-semibold text-oak-900">Import Invoice Data</h2>
                         <p class="mt-1 text-sm text-oak-600">Paste JSON data structure to populate fields</p>
@@ -212,7 +230,7 @@
                         <div>
                             <label for="importJson" class="block text-sm font-medium text-oak-700 mb-2">JSON Data</label>
                             <textarea id="importJson" rows="6" placeholder='{"clientName": "Acme Corp", "fee": 500, ...}'
-                                class="block w-full rounded-lg border-oak-300 bg-white text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm font-mono"></textarea>
+                                class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm font-mono"></textarea>
                         </div>
                         <button id="importBtn" type="button"
                             class="w-full inline-flex items-center justify-center rounded-lg bg-oak-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-oak-700 focus:outline-none focus:ring-2 focus:ring-oak-500 focus:ring-offset-2 shadow">
@@ -228,7 +246,7 @@
             <!-- Normal Mode Section -->
             <div id="normalSection">
                 <!-- Business Details Card -->
-                <div class="mb-6 rounded-lg bg-white border border-oak-300 shadow-lg fade-in">
+                <div class="mb-6 rounded-lg bg-white border border-oak-200 shadow-lg fade-in">
                     <div class="border-b border-oak-200 px-6 py-4 cursor-pointer" id="businessHeader">
                         <div class="flex items-center justify-between">
                             <div>
@@ -242,52 +260,33 @@
                     </div>
                     <div id="businessContent" class="px-6 py-5 space-y-4">
                         <!-- Business Profile Selector -->
-                        <div class="flex gap-2 mb-4 pb-4 border-b border-oak-200">
-                            <button type="button" class="business-profile-btn flex-1 px-3 py-2 text-sm font-medium rounded-lg bg-oak-600 text-white" data-profile="0">Business 1</button>
-                            <button type="button" class="business-profile-btn flex-1 px-3 py-2 text-sm font-medium rounded-lg bg-oak-200 text-oak-700 hover:bg-oak-300" data-profile="1">Business 2</button>
-                            <button type="button" class="business-profile-btn flex-1 px-3 py-2 text-sm font-medium rounded-lg bg-oak-200 text-oak-700 hover:bg-oak-300" data-profile="2">Business 3</button>
-                            <button type="button" class="business-profile-btn flex-1 px-3 py-2 text-sm font-medium rounded-lg bg-oak-200 text-oak-700 hover:bg-oak-300" data-profile="3">Business 4</button>
-                        </div>
-
-                        <!-- Letterhead Upload -->
-                        <div id="letterheadContainer" class="w-full">
-                            <label class="block text-sm font-medium text-oak-700 mb-2">Business Logo</label>
-                            <div id="letterheadUploadArea" class="border-2 border-dashed border-oak-300 rounded-lg px-6 py-4 text-center hover:border-oak-500 cursor-pointer transition-colors">
-                                <svg class="mx-auto h-12 w-12 text-oak-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                </svg>
-                                <p class="mt-2 text-sm text-oak-600">Click to upload logo</p>
-                                <p class="text-xs text-oak-500">PNG, JPG, SVG up to 2MB</p>
-                            </div>
-                            <img id="letterheadPreview" class="letterhead-preview hidden rounded-lg mt-2 mx-auto" alt="Letterhead">
-                        </div>
-                        <input type="file" id="letterheadInput" accept="image/*">
+                        <div id="businessProfileSelector" class="flex gap-2 mb-4 pb-4 border-b border-oak-200"></div>
 
                         <div>
                             <label for="businessName" class="block text-sm font-medium text-oak-700 mb-2">Business Name</label>
                             <input type="text" id="businessName" placeholder="Your Business Name"
-                                class="block w-full rounded-lg border-oak-300 bg-white text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm">
+                                class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm">
                         </div>
                         <div>
                             <label for="yourName" class="block text-sm font-medium text-oak-700 mb-2">Your Name</label>
                             <input type="text" id="yourName" placeholder="Your Full Name"
-                                class="block w-full rounded-lg border-oak-300 bg-white text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm">
+                                class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm">
                         </div>
                         <div>
                             <label for="phoneNumber" class="block text-sm font-medium text-oak-700 mb-2">Phone Number <span class="text-oak-500">(Optional)</span></label>
                             <input type="tel" id="phoneNumber" placeholder="(123) 456-7890"
-                                class="block w-full rounded-lg border-oak-300 bg-white text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm">
+                                class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm">
                         </div>
                         <div>
                             <label for="businessAddress" class="block text-sm font-medium text-oak-700 mb-2">Business Address <span class="text-oak-500">(Optional)</span></label>
                             <textarea id="businessAddress" rows="3" placeholder="123 Your Street&#10;City, State ZIP"
-                                class="block w-full rounded-lg border-oak-300 bg-white text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm"></textarea>
+                                class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm"></textarea>
                         </div>
                     </div>
                 </div>
 
                 <!-- Invoice Details Card -->
-                <div class="mb-6 rounded-lg bg-white border border-oak-300 shadow-lg fade-in">
+                <div class="mb-6 rounded-lg bg-white border border-oak-200 shadow-lg fade-in">
                     <div class="border-b border-oak-200 px-6 py-4">
                         <h2 class="text-lg font-semibold text-oak-900">Invoice Details</h2>
                         <p class="mt-1 text-sm text-oak-600">Fill in the details for this invoice</p>
@@ -298,14 +297,14 @@
                                 Invoice Number <span class="text-oak-500">(Optional - Auto-generated)</span>
                             </label>
                             <input type="text" id="invoiceNumber" placeholder="INV-0001"
-                                class="block w-full rounded-lg border-oak-300 bg-white text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm font-mono">
+                                class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm font-mono">
                             <p class="mt-1 text-xs text-oak-500">Leave blank for auto-increment, or enter a number (e.g., 45 becomes INV-045)</p>
                         </div>
 
                         <div class="input-wrapper">
                             <label for="clientName" class="block text-sm font-medium text-oak-700 mb-2">Client Name</label>
                             <input type="text" id="clientName" placeholder="Client's Name or Company"
-                                class="block w-full rounded-lg border-oak-300 bg-white text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 pr-10 text-sm">
+                                class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 pr-10 text-sm">
                             <button type="button" class="clear-btn text-oak-400 hover:text-oak-600" onclick="document.getElementById('clientName').value = ''; updatePreview();">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -316,7 +315,7 @@
                         <div class="textarea-wrapper input-wrapper">
                             <label for="clientAddress" class="block text-sm font-medium text-oak-700 mb-2">Client Address</label>
                             <textarea id="clientAddress" rows="3" placeholder="123 Main Street&#10;Anytown, USA 12345"
-                                class="block w-full rounded-lg border-oak-300 bg-white text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 pr-10 text-sm"></textarea>
+                                class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 pr-10 text-sm"></textarea>
                             <button type="button" class="clear-btn text-oak-400 hover:text-oak-600" onclick="document.getElementById('clientAddress').value = ''; updatePreview();">
                                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -328,31 +327,31 @@
                             <div>
                                 <label for="invoiceDate" class="block text-sm font-medium text-oak-700 mb-2">Invoice Date</label>
                                 <input type="date" id="invoiceDate"
-                                    class="block w-full rounded-lg border-oak-300 bg-white text-oak-900 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm">
+                                    class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm">
                             </div>
                             <div>
                                 <label for="endDate" class="block text-sm font-medium text-oak-700 mb-2">End Date <span class="text-oak-500">(Optional)</span></label>
                                 <input type="date" id="endDate"
-                                    class="block w-full rounded-lg border-oak-300 bg-white text-oak-900 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm">
+                                    class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm">
                             </div>
                         </div>
 
                         <div>
                             <label for="services" class="block text-sm font-medium text-oak-700 mb-2">Services Provided</label>
                             <textarea id="services" rows="4" placeholder="e.g., Web Design Services&#10;- Homepage Mockup&#10;- Contact Form Integration"
-                                class="block w-full rounded-lg border-oak-300 bg-white text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm"></textarea>
+                                class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm"></textarea>
                         </div>
 
                         <div>
                             <label for="fee" class="block text-sm font-medium text-oak-700 mb-2">Fee ($)</label>
                             <input type="number" id="fee" placeholder="0.00" step="0.01"
-                                class="block w-full rounded-lg border-oak-300 bg-white text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm">
+                                class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm">
                         </div>
 
                         <div>
                             <label for="notes" class="block text-sm font-medium text-oak-700 mb-2">Notes <span class="text-oak-500">(Optional)</span></label>
                             <textarea id="notes" rows="3" placeholder="e.g., Payment due within 30 days."
-                                class="block w-full rounded-lg border-oak-300 bg-white text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm"></textarea>
+                                class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm"></textarea>
                         </div>
                     </div>
                 </div>
@@ -386,7 +385,7 @@
             </div>
 
                 <!-- Preview Card -->
-                <div id="invoicePreview" class="hidden rounded-lg bg-white border border-oak-300 shadow-xl overflow-hidden fade-in">
+                <div id="invoicePreview" class="hidden rounded-lg bg-white border border-oak-200 shadow-xl overflow-hidden fade-in">
                     <div class="bg-gradient-to-r from-oak-600 to-oak-700 px-6 py-4">
                         <h3 class="text-lg font-semibold text-white">Invoice Preview</h3>
                     </div>
@@ -557,6 +556,22 @@
             };
         }
 
+        function isProfileEmpty(profile) {
+            return !profile.businessName && !profile.yourName && !profile.phoneNumber &&
+                   !profile.businessAddress && !profile.letterhead;
+        }
+
+        function getSavedProfiles() {
+            const profiles = [];
+            for (let i = 0; i < 4; i++) {
+                const profile = getBusinessProfile(i);
+                if (!isProfileEmpty(profile)) {
+                    profiles.push({ index: i, profile });
+                }
+            }
+            return profiles;
+        }
+
         function saveBusinessProfile(index) {
             const profile = {
                 businessName: businessNameInput.value,
@@ -565,7 +580,17 @@
                 businessAddress: businessAddressInput.value,
                 letterhead: localStorage.getItem(`businessLetterhead_${index}`) || ''
             };
-            localStorage.setItem(`businessProfile_${index}`, JSON.stringify(profile));
+
+            // Only save if profile has content
+            if (!isProfileEmpty(profile)) {
+                localStorage.setItem(`businessProfile_${index}`, JSON.stringify(profile));
+            } else {
+                // Remove empty profile
+                localStorage.removeItem(`businessProfile_${index}`);
+                localStorage.removeItem(`businessLetterhead_${index}`);
+            }
+
+            renderBusinessProfileSelector();
         }
 
         function loadBusinessProfile(index) {
@@ -588,27 +613,86 @@
             updatePreview();
         }
 
-        // Business Profile Buttons
-        document.querySelectorAll('.business-profile-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                // Save current profile first
-                saveBusinessProfile(currentBusinessProfile);
+        function renderBusinessProfileSelector() {
+            const selector = document.getElementById('businessProfileSelector');
+            const savedProfiles = getSavedProfiles();
 
-                // Update current profile
-                currentBusinessProfile = parseInt(this.dataset.profile);
+            // Clear existing buttons
+            selector.innerHTML = '';
 
-                // Update button states
-                document.querySelectorAll('.business-profile-btn').forEach(b => {
-                    b.classList.remove('bg-oak-600', 'text-white');
-                    b.classList.add('bg-oak-200', 'text-oak-700');
+            // Add buttons for saved profiles
+            savedProfiles.forEach(({ index, profile }) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = index === currentBusinessProfile
+                    ? 'px-3 py-2 text-sm font-medium rounded-lg bg-oak-600 text-white'
+                    : 'px-3 py-2 text-sm font-medium rounded-lg bg-oak-200 text-oak-700 hover:bg-oak-300';
+                btn.textContent = profile.businessName || `Business ${index + 1}`;
+                btn.dataset.profile = index;
+                btn.addEventListener('click', function() {
+                    switchToProfile(parseInt(this.dataset.profile));
                 });
-                this.classList.add('bg-oak-600', 'text-white');
-                this.classList.remove('bg-oak-200', 'text-oak-700');
-
-                // Load new profile
-                loadBusinessProfile(currentBusinessProfile);
+                selector.appendChild(btn);
             });
-        });
+
+            // Add "+" button if we can add more profiles
+            if (savedProfiles.length < 4) {
+                const addBtn = document.createElement('button');
+                addBtn.type = 'button';
+                addBtn.className = 'px-3 py-2 text-sm font-medium rounded-lg bg-oak-100 text-oak-600 hover:bg-oak-200 flex items-center justify-center';
+                addBtn.innerHTML = '<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>';
+                addBtn.title = 'Add new business profile';
+                addBtn.addEventListener('click', addNewBusinessProfile);
+                selector.appendChild(addBtn);
+            }
+
+            // If no profiles and selector is empty, show first business slot
+            if (savedProfiles.length === 0) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'px-3 py-2 text-sm font-medium rounded-lg bg-oak-600 text-white';
+                btn.textContent = 'Business 1';
+                btn.dataset.profile = '0';
+                btn.addEventListener('click', function() {
+                    switchToProfile(0);
+                });
+                selector.appendChild(btn);
+
+                // Still show add button
+                const addBtn = document.createElement('button');
+                addBtn.type = 'button';
+                addBtn.className = 'px-3 py-2 text-sm font-medium rounded-lg bg-oak-100 text-oak-600 hover:bg-oak-200 flex items-center justify-center';
+                addBtn.innerHTML = '<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>';
+                addBtn.title = 'Add new business profile';
+                addBtn.addEventListener('click', addNewBusinessProfile);
+                selector.appendChild(addBtn);
+            }
+        }
+
+        function switchToProfile(index) {
+            // Save current profile first
+            saveBusinessProfile(currentBusinessProfile);
+
+            // Update current profile
+            currentBusinessProfile = index;
+
+            // Load new profile
+            loadBusinessProfile(currentBusinessProfile);
+
+            // Re-render selector to update active state
+            renderBusinessProfileSelector();
+        }
+
+        function addNewBusinessProfile() {
+            // Find first available slot
+            for (let i = 0; i < 4; i++) {
+                const profile = getBusinessProfile(i);
+                if (isProfileEmpty(profile)) {
+                    switchToProfile(i);
+                    return;
+                }
+            }
+        }
 
         // Auto-save business details on blur
         businessNameInput.addEventListener('blur', () => saveBusinessProfile(currentBusinessProfile));
@@ -1011,6 +1095,9 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
 
         // Event listeners
         window.addEventListener('DOMContentLoaded', () => {
+            // Render business profile selector
+            renderBusinessProfileSelector();
+
             // Load initial business profile
             loadBusinessProfile(0);
 
