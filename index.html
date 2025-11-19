@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#111827">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Invoice Generator</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* Hide default file input */
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Letterhead preview */
+        .letterhead-preview {
+            max-height: 120px;
+            object-fit: contain;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .letterhead-preview:hover {
+            opacity: 0.8;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
+        /* Smooth transitions */
+        * {
+            transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+            transition-duration: 200ms;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input, textarea, select {
+            transition-property: all;
+        }
+    </style>
+</head>
+<body class="h-full bg-gray-900 text-white">
+    <div class="min-h-full">
+        <!-- Header with letterhead -->
+        <header class="bg-gray-800 border-b border-gray-700">
+            <div class="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
+                <div class="flex flex-col items-center gap-4">
+                    <!-- Letterhead Upload Area -->
+                    <div id="letterheadContainer" class="w-full flex justify-center">
+                        <div id="letterheadUploadArea" class="border-2 border-dashed border-gray-600 rounded-lg px-6 py-4 text-center hover:border-indigo-500 cursor-pointer transition-colors">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <p class="mt-2 text-sm text-gray-400">Click to upload letterhead</p>
+                            <p class="text-xs text-gray-500">PNG, JPG, SVG up to 2MB</p>
+                        </div>
+                        <img id="letterheadPreview" class="letterhead-preview hidden rounded-lg" alt="Letterhead">
+                    </div>
+                    <input type="file" id="letterheadInput" accept="image/*">
+
+                    <div class="text-center">
+                        <h1 class="text-3xl font-bold tracking-tight text-white sm:text-4xl">Invoice Generator</h1>
+                        <p class="mt-2 text-sm text-gray-400">Create professional invoices in seconds • Works offline</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+            <!-- Success Message -->
+            <div id="successMessage" class="hidden mb-6 rounded-lg bg-green-900/50 border border-green-700 p-4 fade-in">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-green-400">Invoice created successfully! Check your downloads.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Details Card -->
+            <div class="mb-6 rounded-lg bg-gray-800 border border-gray-700 shadow-xl fade-in">
+                <div class="border-b border-gray-700 px-6 py-4">
+                    <h2 class="text-lg font-semibold text-white">Your Business Details</h2>
+                    <p class="mt-1 text-sm text-gray-400">This information will be saved for future invoices</p>
+                </div>
+                <div class="px-6 py-5 space-y-4">
+                    <div>
+                        <label for="businessName" class="block text-sm font-medium text-gray-300 mb-2">Business Name</label>
+                        <input type="text" id="businessName" placeholder="Your Business Name"
+                            class="block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2.5 text-sm">
+                    </div>
+                    <div>
+                        <label for="yourName" class="block text-sm font-medium text-gray-300 mb-2">Your Name</label>
+                        <input type="text" id="yourName" placeholder="Your Full Name"
+                            class="block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2.5 text-sm">
+                    </div>
+                    <div>
+                        <label for="phoneNumber" class="block text-sm font-medium text-gray-300 mb-2">Phone Number <span class="text-gray-500">(Optional)</span></label>
+                        <input type="tel" id="phoneNumber" placeholder="(123) 456-7890"
+                            class="block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2.5 text-sm">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice Details Card -->
+            <div class="mb-6 rounded-lg bg-gray-800 border border-gray-700 shadow-xl fade-in">
+                <div class="border-b border-gray-700 px-6 py-4">
+                    <h2 class="text-lg font-semibold text-white">Invoice Details</h2>
+                    <p class="mt-1 text-sm text-gray-400">Fill in the details for this invoice</p>
+                </div>
+                <div class="px-6 py-5 space-y-4">
+                    <div>
+                        <label for="invoiceNumber" class="block text-sm font-medium text-gray-300 mb-2">
+                            Invoice Number <span class="text-gray-500">(Optional - Auto-generated)</span>
+                        </label>
+                        <input type="text" id="invoiceNumber" placeholder="INV-0001"
+                            class="block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2.5 text-sm font-mono">
+                        <p class="mt-1 text-xs text-gray-500">Leave blank for auto-increment, or enter a number (e.g., 45 becomes INV-045)</p>
+                    </div>
+
+                    <div>
+                        <label for="clientName" class="block text-sm font-medium text-gray-300 mb-2">Client Name</label>
+                        <input type="text" id="clientName" placeholder="Client's Name or Company"
+                            class="block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2.5 text-sm">
+                    </div>
+
+                    <div>
+                        <label for="clientAddress" class="block text-sm font-medium text-gray-300 mb-2">Client Address</label>
+                        <textarea id="clientAddress" rows="3" placeholder="123 Main Street&#10;Anytown, USA 12345"
+                            class="block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2.5 text-sm"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                            <label for="invoiceDate" class="block text-sm font-medium text-gray-300 mb-2">Invoice Date</label>
+                            <input type="date" id="invoiceDate"
+                                class="block w-full rounded-lg border-gray-600 bg-gray-700 text-white focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2.5 text-sm">
+                        </div>
+                        <div>
+                            <label for="endDate" class="block text-sm font-medium text-gray-300 mb-2">End Date <span class="text-gray-500">(Optional)</span></label>
+                            <input type="date" id="endDate"
+                                class="block w-full rounded-lg border-gray-600 bg-gray-700 text-white focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2.5 text-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="services" class="block text-sm font-medium text-gray-300 mb-2">Services Provided</label>
+                        <textarea id="services" rows="4" placeholder="e.g., Web Design Services&#10;- Homepage Mockup&#10;- Contact Form Integration"
+                            class="block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2.5 text-sm"></textarea>
+                    </div>
+
+                    <div>
+                        <label for="fee" class="block text-sm font-medium text-gray-300 mb-2">Fee ($)</label>
+                        <input type="number" id="fee" placeholder="0.00" step="0.01"
+                            class="block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2.5 text-sm">
+                    </div>
+
+                    <div>
+                        <label for="notes" class="block text-sm font-medium text-gray-300 mb-2">Notes <span class="text-gray-500">(Optional)</span></label>
+                        <textarea id="notes" rows="3" placeholder="e.g., Payment due within 30 days."
+                            class="block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2.5 text-sm"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-3 mb-8">
+                <button id="fillDemoBtn" type="button"
+                    class="flex-1 sm:flex-none inline-flex items-center justify-center rounded-lg bg-gray-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-900">
+                    <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    Demo Data
+                </button>
+                <button id="previewBtn" type="button"
+                    class="flex-1 inline-flex items-center justify-center rounded-lg bg-gray-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-900">
+                    <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    Preview
+                </button>
+                <button id="generateBtn" type="button"
+                    class="flex-1 inline-flex items-center justify-center rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900 shadow-lg">
+                    <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Create PDF
+                </button>
+            </div>
+
+            <!-- Preview Card -->
+            <div id="invoicePreview" class="hidden rounded-lg bg-white border border-gray-200 shadow-xl overflow-hidden fade-in">
+                <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-4">
+                    <h3 class="text-lg font-semibold text-white">Invoice Preview</h3>
+                </div>
+                <div class="px-6 py-8 text-gray-900">
+                    <!-- Letterhead in preview -->
+                    <div id="previewLetterhead" class="mb-6 text-center hidden">
+                        <img id="previewLetterheadImg" class="mx-auto max-h-24 object-contain" alt="Letterhead">
+                    </div>
+
+                    <div class="flex justify-between items-start mb-8">
+                        <div class="text-3xl font-bold text-gray-900">INVOICE</div>
+                        <div id="invoiceNumberPreview" class="text-lg font-semibold text-gray-600">#INV-0001</div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <div id="previewFromSection" class="hidden">
+                            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">From</div>
+                            <div id="previewBusinessName" class="font-medium text-gray-900"></div>
+                            <div id="previewYourName" class="text-gray-700"></div>
+                            <div id="previewPhone" class="text-gray-700"></div>
+                        </div>
+
+                        <div id="previewToSection" class="hidden">
+                            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Bill To</div>
+                            <div id="previewClientName" class="font-medium text-gray-900"></div>
+                            <div id="previewClientAddress" class="text-gray-700 whitespace-pre-line"></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                        <div id="previewDateSection" class="hidden">
+                            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Invoice Date</div>
+                            <div id="previewInvoiceDate" class="text-gray-900"></div>
+                        </div>
+
+                        <div id="previewServiceDateSection" class="hidden">
+                            <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Service Date</div>
+                            <div id="previewServiceDate" class="text-gray-900"></div>
+                        </div>
+                    </div>
+
+                    <div id="previewServicesSection" class="mb-8 hidden">
+                        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Description</div>
+                        <div id="previewServices" class="text-gray-900 whitespace-pre-line"></div>
+                    </div>
+
+                    <div id="previewFeeSection" class="mb-8 hidden border-t-2 border-gray-300 pt-6">
+                        <div class="flex justify-between items-center">
+                            <div class="text-lg font-semibold text-gray-900">Total Amount Due</div>
+                            <div id="previewFee" class="text-3xl font-bold text-indigo-600"></div>
+                        </div>
+                    </div>
+
+                    <div id="previewNotesSection" class="hidden border-t-2 border-gray-200 pt-6">
+                        <div class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Notes</div>
+                        <div id="previewNotes" class="text-gray-700 whitespace-pre-line"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-12 border-t border-gray-800 py-6">
+            <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+                <p class="text-center text-sm text-gray-500">
+                    Invoice Generator • Works offline • Data stored locally
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Register service worker for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log('Service Worker registered', reg))
+                .catch(err => console.log('Service Worker registration failed', err));
+        }
+
+        // Initialize jsPDF
+        const { jsPDF } = window.jspdf;
+
+        // DOM Elements
+        const businessNameInput = document.getElementById('businessName');
+        const yourNameInput = document.getElementById('yourName');
+        const phoneNumberInput = document.getElementById('phoneNumber');
+        const invoiceNumberInput = document.getElementById('invoiceNumber');
+        const clientNameInput = document.getElementById('clientName');
+        const clientAddressInput = document.getElementById('clientAddress');
+        const invoiceDateInput = document.getElementById('invoiceDate');
+        const endDateInput = document.getElementById('endDate');
+        const servicesInput = document.getElementById('services');
+        const feeInput = document.getElementById('fee');
+        const notesInput = document.getElementById('notes');
+
+        const previewBtn = document.getElementById('previewBtn');
+        const generateBtn = document.getElementById('generateBtn');
+        const fillDemoBtn = document.getElementById('fillDemoBtn');
+        const invoicePreview = document.getElementById('invoicePreview');
+        const successMessage = document.getElementById('successMessage');
+
+        const letterheadInput = document.getElementById('letterheadInput');
+        const letterheadUploadArea = document.getElementById('letterheadUploadArea');
+        const letterheadPreview = document.getElementById('letterheadPreview');
+
+        // Load saved data
+        function loadSavedDetails() {
+            const savedBusinessName = localStorage.getItem('invoiceBusinessName');
+            const savedYourName = localStorage.getItem('invoiceYourName');
+            const savedPhoneNumber = localStorage.getItem('invoicePhoneNumber');
+            const savedLetterhead = localStorage.getItem('invoiceLetterhead');
+
+            if (savedBusinessName) businessNameInput.value = savedBusinessName;
+            if (savedYourName) yourNameInput.value = savedYourName;
+            if (savedPhoneNumber) phoneNumberInput.value = savedPhoneNumber;
+            if (savedLetterhead) {
+                letterheadPreview.src = savedLetterhead;
+                letterheadPreview.classList.remove('hidden');
+                letterheadUploadArea.classList.add('hidden');
+            }
+
+            // Load last invoice number used
+            const lastInvoiceNumber = parseInt(localStorage.getItem('lastInvoiceNumber') || '0', 10);
+            invoiceNumberInput.placeholder = `INV-${(lastInvoiceNumber + 1).toString().padStart(3, '0')}`;
+        }
+
+        function saveBusinessDetails() {
+            localStorage.setItem('invoiceBusinessName', businessNameInput.value);
+            localStorage.setItem('invoiceYourName', yourNameInput.value);
+            localStorage.setItem('invoicePhoneNumber', phoneNumberInput.value);
+        }
+
+        // Letterhead handling
+        letterheadUploadArea.addEventListener('click', () => letterheadInput.click());
+        letterheadPreview.addEventListener('click', () => letterheadInput.click());
+
+        letterheadInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('Image size should be less than 2MB');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const imageData = event.target.result;
+                    letterheadPreview.src = imageData;
+                    letterheadPreview.classList.remove('hidden');
+                    letterheadUploadArea.classList.add('hidden');
+                    localStorage.setItem('invoiceLetterhead', imageData);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Format date
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            const adjustedDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+            return adjustedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        // Parse invoice number
+        function parseInvoiceNumber(input) {
+            if (!input) return null;
+            // Extract number from input (e.g., "45" or "INV-045" -> 45)
+            const match = input.match(/\d+/);
+            return match ? parseInt(match[0], 10) : null;
+        }
+
+        // Format invoice number
+        function formatInvoiceNumber(num) {
+            return `INV-${num.toString().padStart(3, '0')}`;
+        }
+
+        // Update preview
+        function updatePreview() {
+            // From section
+            const hasFrom = businessNameInput.value || yourNameInput.value || phoneNumberInput.value;
+            const fromSection = document.getElementById('previewFromSection');
+            fromSection.style.display = hasFrom ? 'block' : 'none';
+            document.getElementById('previewBusinessName').textContent = businessNameInput.value;
+            document.getElementById('previewYourName').textContent = yourNameInput.value;
+            document.getElementById('previewPhone').textContent = phoneNumberInput.value;
+
+            // To section
+            const hasTo = clientNameInput.value || clientAddressInput.value;
+            const toSection = document.getElementById('previewToSection');
+            toSection.style.display = hasTo ? 'block' : 'none';
+            document.getElementById('previewClientName').textContent = clientNameInput.value;
+            document.getElementById('previewClientAddress').textContent = clientAddressInput.value;
+
+            // Invoice number
+            let displayNumber = invoiceNumberInput.value;
+            if (displayNumber) {
+                const parsed = parseInvoiceNumber(displayNumber);
+                if (parsed !== null) {
+                    displayNumber = formatInvoiceNumber(parsed);
+                }
+            } else {
+                displayNumber = invoiceNumberInput.placeholder;
+            }
+            document.getElementById('invoiceNumberPreview').textContent = '#' + displayNumber;
+
+            // Dates
+            const dateSection = document.getElementById('previewDateSection');
+            dateSection.style.display = invoiceDateInput.value ? 'block' : 'none';
+            document.getElementById('previewInvoiceDate').textContent = formatDate(invoiceDateInput.value);
+
+            const serviceDateSection = document.getElementById('previewServiceDateSection');
+            const hasServiceDate = invoiceDateInput.value;
+            serviceDateSection.style.display = hasServiceDate ? 'block' : 'none';
+            const serviceDate = formatDate(invoiceDateInput.value);
+            const endDate = formatDate(endDateInput.value);
+            document.getElementById('previewServiceDate').textContent = endDate ? `${serviceDate} - ${endDate}` : serviceDate;
+
+            // Services
+            const servicesSection = document.getElementById('previewServicesSection');
+            servicesSection.style.display = servicesInput.value ? 'block' : 'none';
+            document.getElementById('previewServices').textContent = servicesInput.value;
+
+            // Fee
+            const feeSection = document.getElementById('previewFeeSection');
+            feeSection.style.display = feeInput.value ? 'block' : 'none';
+            document.getElementById('previewFee').textContent = feeInput.value ? `$${parseFloat(feeInput.value).toFixed(2)}` : '$0.00';
+
+            // Notes
+            const notesSection = document.getElementById('previewNotesSection');
+            notesSection.style.display = notesInput.value ? 'block' : 'none';
+            document.getElementById('previewNotes').textContent = notesInput.value;
+
+            // Letterhead
+            const previewLetterhead = document.getElementById('previewLetterhead');
+            const previewLetterheadImg = document.getElementById('previewLetterheadImg');
+            const savedLetterhead = localStorage.getItem('invoiceLetterhead');
+            if (savedLetterhead) {
+                previewLetterheadImg.src = savedLetterhead;
+                previewLetterhead.classList.remove('hidden');
+            } else {
+                previewLetterhead.classList.add('hidden');
+            }
+        }
+
+        // Generate PDF
+        function generatePDF() {
+            const doc = new jsPDF();
+            let yPos = 20;
+            const pageWidth = doc.internal.pageSize.width;
+            const col1 = 20;
+            const col2 = pageWidth / 2 + 10;
+
+            // Add letterhead if exists
+            const savedLetterhead = localStorage.getItem('invoiceLetterhead');
+            if (savedLetterhead) {
+                try {
+                    const img = new Image();
+                    img.src = savedLetterhead;
+                    const imgWidth = 60;
+                    const imgHeight = (img.height / img.width) * imgWidth;
+                    doc.addImage(savedLetterhead, 'PNG', (pageWidth - imgWidth) / 2, yPos, imgWidth, imgHeight);
+                    yPos += imgHeight + 10;
+                } catch (e) {
+                    console.error('Error adding letterhead to PDF:', e);
+                }
+            }
+
+            // Invoice header
+            doc.setFontSize(28);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(79, 70, 229); // Indigo
+            doc.text('INVOICE', 105, yPos, { align: 'center' });
+            yPos += 12;
+
+            // Invoice number
+            let invoiceNum = invoiceNumberInput.value;
+            if (invoiceNum) {
+                const parsed = parseInvoiceNumber(invoiceNum);
+                if (parsed !== null) {
+                    invoiceNum = formatInvoiceNumber(parsed);
+                }
+            } else {
+                invoiceNum = invoiceNumberInput.placeholder;
+            }
+
+            doc.setFontSize(11);
+            doc.setTextColor(75, 85, 99);
+            doc.setFont(undefined, 'normal');
+
+            if (invoiceDateInput.value) {
+                doc.text(`#${invoiceNum} | ${formatDate(invoiceDateInput.value)}`, 105, yPos, { align: 'center' });
+                yPos += 20;
+            } else {
+                doc.text(`#${invoiceNum}`, 105, yPos, { align: 'center' });
+                yPos += 20;
+            }
+
+            // From and To sections
+            let fromYPos = yPos;
+            let toYPos = yPos;
+            const hasFrom = businessNameInput.value || yourNameInput.value || phoneNumberInput.value;
+            const hasTo = clientNameInput.value || clientAddressInput.value;
+
+            if (hasFrom) {
+                doc.setFontSize(10);
+                doc.setTextColor(107, 114, 128);
+                doc.setFont(undefined, 'bold');
+                doc.text('FROM:', col1, fromYPos);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(31, 41, 55);
+                fromYPos += 6;
+                if (businessNameInput.value) {
+                    doc.setFont(undefined, 'bold');
+                    doc.text(businessNameInput.value, col1, fromYPos);
+                    doc.setFont(undefined, 'normal');
+                    fromYPos += 5;
+                }
+                if (yourNameInput.value) {
+                    doc.text(yourNameInput.value, col1, fromYPos);
+                    fromYPos += 5;
+                }
+                if (phoneNumberInput.value) {
+                    doc.text(phoneNumberInput.value, col1, fromYPos);
+                    fromYPos += 5;
+                }
+            }
+
+            if (hasTo) {
+                doc.setFontSize(10);
+                doc.setTextColor(107, 114, 128);
+                doc.setFont(undefined, 'bold');
+                doc.text('BILL TO:', col2, toYPos);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(31, 41, 55);
+                toYPos += 6;
+                if (clientNameInput.value) {
+                    doc.setFont(undefined, 'bold');
+                    doc.text(clientNameInput.value, col2, toYPos);
+                    doc.setFont(undefined, 'normal');
+                    toYPos += 5;
+                }
+                if (clientAddressInput.value) {
+                    const addressLines = doc.splitTextToSize(clientAddressInput.value, pageWidth / 2 - 20);
+                    doc.text(addressLines, col2, toYPos);
+                    toYPos += (addressLines.length * 5);
+                }
+            }
+
+            yPos = Math.max(fromYPos, toYPos);
+            if (hasFrom || hasTo) {
+                yPos += 10;
+            }
+
+            // Service date
+            if (invoiceDateInput.value) {
+                doc.setFontSize(10);
+                doc.setTextColor(107, 114, 128);
+                doc.setFont(undefined, 'bold');
+                const serviceDateText = endDateInput.value
+                    ? `SERVICE PERIOD: ${formatDate(invoiceDateInput.value)} - ${formatDate(endDateInput.value)}`
+                    : `SERVICE DATE: ${formatDate(invoiceDateInput.value)}`;
+                doc.text(serviceDateText, col1, yPos);
+                yPos += 10;
+            }
+
+            // Services
+            if (servicesInput.value) {
+                doc.setFontSize(10);
+                doc.setTextColor(107, 114, 128);
+                doc.setFont(undefined, 'bold');
+                doc.text('DESCRIPTION:', col1, yPos);
+                yPos += 6;
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(31, 41, 55);
+                const serviceLines = doc.splitTextToSize(servicesInput.value, pageWidth - 40);
+                doc.text(serviceLines, col1, yPos);
+                yPos += (serviceLines.length * 5) + 12;
+            }
+
+            // Total
+            if (feeInput.value) {
+                doc.setLineWidth(0.5);
+                doc.setDrawColor(209, 213, 219);
+                doc.line(col1, yPos, pageWidth - 20, yPos);
+                yPos += 8;
+
+                doc.setFontSize(12);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(31, 41, 55);
+                doc.text('TOTAL AMOUNT DUE:', col1, yPos);
+                doc.setFontSize(20);
+                doc.setTextColor(79, 70, 229);
+                doc.text(`$${parseFloat(feeInput.value).toFixed(2)}`, pageWidth - 20, yPos, { align: 'right' });
+                yPos += 12;
+            }
+
+            // Notes
+            if (notesInput.value) {
+                doc.setLineWidth(0.5);
+                doc.setDrawColor(229, 231, 235);
+                doc.line(col1, yPos, pageWidth - 20, yPos);
+                yPos += 8;
+
+                doc.setFontSize(10);
+                doc.setTextColor(107, 114, 128);
+                doc.setFont(undefined, 'bold');
+                doc.text('NOTES:', col1, yPos);
+                yPos += 6;
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(55, 65, 81);
+                const noteLines = doc.splitTextToSize(notesInput.value, pageWidth - 40);
+                doc.text(noteLines, col1, yPos);
+            }
+
+            // Save PDF
+            const fileNameBase = clientNameInput.value || 'invoice';
+            const dateStr = new Date().toISOString().slice(0, 10);
+            const fileName = `invoice_${fileNameBase.replace(/\s+/g, '_')}_${dateStr}.pdf`;
+            doc.save(fileName);
+
+            // Update invoice number tracking
+            const usedNumber = parseInvoiceNumber(invoiceNumberInput.value) ||
+                              parseInt(localStorage.getItem('lastInvoiceNumber') || '0', 10) + 1;
+            localStorage.setItem('lastInvoiceNumber', usedNumber.toString());
+
+            // Update placeholder for next invoice
+            invoiceNumberInput.placeholder = formatInvoiceNumber(usedNumber + 1);
+            invoiceNumberInput.value = '';
+
+            // Show success message
+            successMessage.classList.remove('hidden');
+            successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => {
+                successMessage.classList.add('hidden');
+            }, 5000);
+
+            updatePreview();
+        }
+
+        // Fill demo data
+        function fillDemoData() {
+            const today = new Date().toISOString().slice(0, 10);
+
+            businessNameInput.value = 'Innovatech Web Solutions';
+            yourNameInput.value = 'Jane Doe';
+            phoneNumberInput.value = '(555) 123-4567';
+
+            clientNameInput.value = 'Acme Corporation';
+            clientAddressInput.value = '456 Business Rd\nSuite 700\nMetropolis, NY 10001';
+
+            invoiceDateInput.value = today;
+            endDateInput.value = '';
+
+            servicesInput.value = 'Monthly Website Maintenance Package (Nov 2025)\n- Daily Backups & Security Scans\n- Plugin & Core Updates\n- 2 hours of development support';
+
+            feeInput.value = '350.00';
+            notesInput.value = 'Thank you for your business! Payment is due upon receipt.';
+
+            updatePreview();
+            invoicePreview.classList.remove('hidden');
+            invoicePreview.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Event listeners
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSavedDetails();
+            if (!invoiceDateInput.value) {
+                invoiceDateInput.value = new Date().toISOString().slice(0, 10);
+            }
+            updatePreview();
+        });
+
+        businessNameInput.addEventListener('blur', saveBusinessDetails);
+        yourNameInput.addEventListener('blur', saveBusinessDetails);
+        phoneNumberInput.addEventListener('blur', saveBusinessDetails);
+
+        const formInputs = [
+            businessNameInput, yourNameInput, phoneNumberInput,
+            invoiceNumberInput, clientNameInput, clientAddressInput,
+            invoiceDateInput, endDateInput, servicesInput, feeInput, notesInput
+        ];
+
+        formInputs.forEach(input => {
+            input.addEventListener('input', updatePreview);
+        });
+
+        previewBtn.addEventListener('click', () => {
+            updatePreview();
+            invoicePreview.classList.remove('hidden');
+            invoicePreview.scrollIntoView({ behavior: 'smooth' });
+        });
+
+        generateBtn.addEventListener('click', generatePDF);
+        fillDemoBtn.addEventListener('click', fillDemoData);
+    </script>
+</body>
+</html>
