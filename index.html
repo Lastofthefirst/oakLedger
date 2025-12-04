@@ -139,6 +139,12 @@
         .toggle-checkbox:checked + .toggle-label {
             background-color: #8B6F47;
         }
+
+        /* Import button selected state */
+        .import-button-selected {
+            background-color: #8B6F47 !important;
+            color: white !important;
+        }
     </style>
 </head>
 <body class="h-full bg-oak-50 text-oak-900">
@@ -158,7 +164,7 @@
                                 <p class="text-xs text-oak-500">PNG, JPG, SVG up to 2MB</p>
                                 <p class="text-xs text-oak-500 mt-1">Transparent or white background works best</p>
                             </div>
-                            <img id="letterheadPreview" class="letterhead-preview hidden rounded-lg mt-2 mx-auto" alt="Letterhead">
+                            <img id="letterheadPreview" class="letterhead-preview hidden mt-2 mx-auto" alt="Letterhead">
                         </div>
                     </div>
                     <input type="file" id="letterheadInput" accept="image/*">
@@ -172,13 +178,12 @@
         </header>
 
         <main class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-            <!-- Import Mode Toggle -->
+            <!-- Import Mode Button -->
             <div class="mb-6 flex items-center justify-end gap-3">
-                <span class="text-sm text-oak-700">Import Mode</span>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" id="importModeToggle" class="sr-only peer">
-                    <div class="w-11 h-6 bg-oak-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-oak-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-oak-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-oak-600"></div>
-                </label>
+                <button id="importModeButton" type="button"
+                    class="inline-flex items-center justify-center rounded-lg bg-oak-200 px-4 py-2 text-sm font-medium text-oak-700 hover:bg-oak-300 focus:outline-none focus:ring-2 focus:ring-oak-500 focus:ring-offset-2 transition-colors">
+                    Import
+                </button>
             </div>
 
             <!-- Success Message -->
@@ -259,8 +264,23 @@
                         </div>
                     </div>
                     <div id="businessContent" class="px-6 py-5 space-y-4">
-                        <!-- Business Profile Selector -->
-                        <div id="businessProfileSelector" class="flex gap-2 mb-4 pb-4 border-b border-oak-200"></div>
+                        <!-- Business Profile Tabs -->
+                        <div class="mb-4">
+                            <div class="flex flex-wrap justify-between items-end gap-2 mb-2">
+                                <div id="businessProfileTabs" class="flex flex-wrap gap-1"></div>
+                                <button id="addBusinessProfileBtn" type="button"
+                                    class="px-3 py-2 text-sm font-medium rounded-lg bg-oak-100 text-oak-600 hover:bg-oak-200 flex items-center justify-center"
+                                    title="Add new business profile">+</button>
+                            </div>
+                            <!-- Tab bottom border to connect visually with content -->
+                            <div class="h-1 bg-oak-200 rounded-t-md"></div>
+                        </div>
+                        <!-- Business Profile Delete Button -->
+                        <div class="flex justify-end">
+                            <button id="deleteBusinessProfileBtn" type="button"
+                                class="px-3 py-1 text-sm font-medium rounded-lg text-red-600 hover:bg-red-50 hidden"
+                                title="Remove this business profile">Remove</button>
+                        </div>
 
                         <div>
                             <label for="businessName" class="block text-sm font-medium text-oak-700 mb-2">Business Name</label>
@@ -273,12 +293,12 @@
                                 class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm">
                         </div>
                         <div>
-                            <label for="phoneNumber" class="block text-sm font-medium text-oak-700 mb-2">Phone Number <span class="text-oak-500">(Optional)</span></label>
+                            <label for="phoneNumber" class="block text-sm font-medium text-oak-700 mb-2">Phone Number</label>
                             <input type="tel" id="phoneNumber" placeholder="(123) 456-7890"
                                 class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm">
                         </div>
                         <div>
-                            <label for="businessAddress" class="block text-sm font-medium text-oak-700 mb-2">Business Address <span class="text-oak-500">(Optional)</span></label>
+                            <label for="businessAddress" class="block text-sm font-medium text-oak-700 mb-2">Business Address</label>
                             <textarea id="businessAddress" rows="3" placeholder="123 Your Street&#10;City, State ZIP"
                                 class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm"></textarea>
                         </div>
@@ -290,11 +310,12 @@
                     <div class="border-b border-oak-200 px-6 py-4">
                         <h2 class="text-lg font-semibold text-oak-900">Invoice Details</h2>
                         <p class="mt-1 text-sm text-oak-600">Fill in the details for this invoice</p>
+                        <p class="mt-1 text-xs text-oak-500">All details are optional</p>
                     </div>
                     <div class="px-6 py-5 space-y-4">
                         <div>
                             <label for="invoiceNumber" class="block text-sm font-medium text-oak-700 mb-2">
-                                Invoice Number <span class="text-oak-500">(Optional - Auto-generated)</span>
+                                Invoice Number <span class="text-oak-500">(Automatic)</span>
                             </label>
                             <input type="text" id="invoiceNumber" placeholder="INV-0001"
                                 class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm font-mono">
@@ -323,16 +344,28 @@
                             </button>
                         </div>
 
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
                             <div>
                                 <label for="invoiceDate" class="block text-sm font-medium text-oak-700 mb-2">Invoice Date</label>
                                 <input type="date" id="invoiceDate"
                                     class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm">
                             </div>
-                            <div>
-                                <label for="endDate" class="block text-sm font-medium text-oak-700 mb-2">End Date <span class="text-oak-500">(Optional)</span></label>
-                                <input type="date" id="endDate"
-                                    class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-oak-700 mb-2">Work Period</label>
+                            <div class="bg-oak-100/30 rounded-lg p-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="workStartDate" class="block text-sm font-medium text-oak-700 mb-2">Start</label>
+                                        <input type="date" id="workStartDate"
+                                            class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm">
+                                    </div>
+                                    <div>
+                                        <label for="workEndDate" class="block text-sm font-medium text-oak-700 mb-2">End</label>
+                                        <input type="date" id="workEndDate"
+                                            class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm">
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -349,7 +382,7 @@
                         </div>
 
                         <div>
-                            <label for="notes" class="block text-sm font-medium text-oak-700 mb-2">Notes <span class="text-oak-500">(Optional)</span></label>
+                            <label for="notes" class="block text-sm font-medium text-oak-700 mb-2">Notes</label>
                             <textarea id="notes" rows="3" placeholder="e.g., Payment due within 30 days."
                                 class="block w-full rounded-lg border-oak-200 bg-oak-50/30 text-oak-900 placeholder-oak-400 focus:border-oak-500 focus:ring-oak-500 px-4 py-2.5 text-sm"></textarea>
                         </div>
@@ -367,10 +400,10 @@
                             </svg>
                             Preview
                         </button>
-                        <button id="fillDemoBtn" type="button" title="Fill with demo data"
+                        <button id="fillDemoBtn" type="button" title="Fill with witty demo data"
                             class="inline-flex items-center justify-center rounded-lg bg-oak-100 px-3 py-2.5 text-sm text-oak-600 hover:bg-oak-200 focus:outline-none focus:ring-2 focus:ring-oak-400">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                             </svg>
                         </button>
                     </div>
@@ -474,7 +507,7 @@
         let currentBusinessProfile = 0;
 
         // DOM Elements
-        const importModeToggle = document.getElementById('importModeToggle');
+        const importModeButton = document.getElementById('importModeButton');
         const importSection = document.getElementById('importSection');
         const normalSection = document.getElementById('normalSection');
         const businessHeader = document.getElementById('businessHeader');
@@ -489,7 +522,8 @@
         const clientNameInput = document.getElementById('clientName');
         const clientAddressInput = document.getElementById('clientAddress');
         const invoiceDateInput = document.getElementById('invoiceDate');
-        const endDateInput = document.getElementById('endDate');
+        const workStartDateInput = document.getElementById('workStartDate');
+        const workEndDateInput = document.getElementById('workEndDate');
         const servicesInput = document.getElementById('services');
         const feeInput = document.getElementById('fee');
         const notesInput = document.getElementById('notes');
@@ -510,14 +544,21 @@
         const importJson = document.getElementById('importJson');
         const importBtn = document.getElementById('importBtn');
 
-        // Import Mode Toggle
-        importModeToggle.addEventListener('change', function() {
-            if (this.checked) {
+        // Import Mode Button
+        let isImportMode = false;
+        importModeButton.addEventListener('click', function() {
+            isImportMode = !isImportMode;
+
+            if (isImportMode) {
+                // Switch to import mode
                 importSection.classList.remove('hidden');
                 normalSection.classList.add('hidden');
+                importModeButton.classList.add('import-button-selected');
             } else {
+                // Switch back to normal mode
                 importSection.classList.add('hidden');
                 normalSection.classList.remove('hidden');
+                importModeButton.classList.remove('import-button-selected');
             }
         });
 
@@ -590,7 +631,17 @@
                 localStorage.removeItem(`businessLetterhead_${index}`);
             }
 
-            renderBusinessProfileSelector();
+            renderBusinessProfileTabs();
+            updateAddBusinessButtonVisibility();
+
+            // Update delete button visibility based on number of profiles and whether current profile is removable
+            const savedProfiles = getSavedProfiles();
+            const deleteBtn = document.getElementById('deleteBusinessProfileBtn');
+            if (savedProfiles.length > 1 && currentBusinessProfile !== 0) {
+                deleteBtn.classList.remove('hidden');
+            } else {
+                deleteBtn.classList.add('hidden');
+            }
         }
 
         function loadBusinessProfile(index) {
@@ -610,63 +661,44 @@
                 letterheadUploadArea.classList.remove('hidden');
             }
 
+            // Update invoice number placeholder for this business
+            const lastInvoiceNumber = parseInt(localStorage.getItem(`lastInvoiceNumber_${index}`) || '0', 10);
+            invoiceNumberInput.placeholder = `INV-${(lastInvoiceNumber + 1).toString().padStart(3, '0')}`;
+
             updatePreview();
         }
 
-        function renderBusinessProfileSelector() {
-            const selector = document.getElementById('businessProfileSelector');
+        function renderBusinessProfileTabs() {
+            const tabsContainer = document.getElementById('businessProfileTabs');
             const savedProfiles = getSavedProfiles();
 
-            // Clear existing buttons
-            selector.innerHTML = '';
+            // Clear existing tabs
+            tabsContainer.innerHTML = '';
 
-            // Add buttons for saved profiles
+            // Add tabs for saved profiles
             savedProfiles.forEach(({ index, profile }) => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = index === currentBusinessProfile
-                    ? 'px-3 py-2 text-sm font-medium rounded-lg bg-oak-600 text-white'
-                    : 'px-3 py-2 text-sm font-medium rounded-lg bg-oak-200 text-oak-700 hover:bg-oak-300';
-                btn.textContent = profile.businessName || `Business ${index + 1}`;
-                btn.dataset.profile = index;
-                btn.addEventListener('click', function() {
+                const tabContainer = document.createElement('div');
+                tabContainer.className = 'flex items-center';
+
+                // Create tab button with tab-like styling
+                const tabButton = document.createElement('button');
+                tabButton.type = 'button';
+                if (index === currentBusinessProfile) {
+                    // Active tab styling - higher and with top border
+                    tabButton.className = 'px-3 py-3 text-sm font-medium bg-white text-oak-900 border-t border-l border-r border-oak-400 rounded-t-lg shadow-sm z-10 -mb-1';
+                } else {
+                    // Inactive tab styling - lower with subtle border
+                    tabButton.className = 'px-3 py-2 text-sm font-medium bg-oak-200 text-oak-700 hover:bg-oak-300 border border-oak-300 rounded-t-md';
+                }
+                tabButton.textContent = profile.businessName || `Business ${index + 1}`;
+                tabButton.dataset.profile = index;
+                tabButton.addEventListener('click', function() {
                     switchToProfile(parseInt(this.dataset.profile));
                 });
-                selector.appendChild(btn);
+
+                tabContainer.appendChild(tabButton);
+                tabsContainer.appendChild(tabContainer);
             });
-
-            // Add "+" button if we can add more profiles
-            // if (savedProfiles.length < 4) {
-            //     const addBtn = document.createElement('button');
-            //     addBtn.type = 'button';
-            //     addBtn.className = 'px-3 py-2 text-sm font-medium rounded-lg bg-oak-100 text-oak-600 hover:bg-oak-200 flex items-center justify-center';
-            //     addBtn.innerHTML = '<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>';
-            //     addBtn.title = 'Add new business profile';
-            //     addBtn.addEventListener('click', addNewBusinessProfile);
-            //     selector.appendChild(addBtn);
-            // }
-
-            // If no profiles and selector is empty, show first business slot
-            if (savedProfiles.length === 0) {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'px-3 py-2 text-sm font-medium rounded-lg bg-oak-600 text-white';
-                btn.textContent = 'Business Information';
-                btn.dataset.profile = '0';
-                btn.addEventListener('click', function() {
-                    switchToProfile(0);
-                });
-                selector.appendChild(btn);
-
-                // Still show add button
-                const addBtn = document.createElement('button');
-                addBtn.type = 'button';
-                addBtn.className = 'px-3 py-2 text-sm font-medium rounded-lg bg-oak-100 text-oak-600 hover:bg-oak-200 flex items-center justify-center';
-                addBtn.innerHTML = '<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>';
-                addBtn.title = 'Add new business profile';
-                addBtn.addEventListener('click', addNewBusinessProfile);
-                selector.appendChild(addBtn);
-            }
         }
 
         function switchToProfile(index) {
@@ -679,8 +711,17 @@
             // Load new profile
             loadBusinessProfile(currentBusinessProfile);
 
-            // Re-render selector to update active state
-            renderBusinessProfileSelector();
+            // Re-render tabs to update active state
+            renderBusinessProfileTabs();
+
+            // Show/hide delete button based on whether there are multiple profiles and it's not the default profile
+            const savedProfiles = getSavedProfiles();
+            const deleteBtn = document.getElementById('deleteBusinessProfileBtn');
+            if (savedProfiles.length > 1 && currentBusinessProfile !== 0) {
+                deleteBtn.classList.remove('hidden');
+            } else {
+                deleteBtn.classList.add('hidden');
+            }
         }
 
         function addNewBusinessProfile() {
@@ -689,8 +730,86 @@
                 const profile = getBusinessProfile(i);
                 if (isProfileEmpty(profile)) {
                     switchToProfile(i);
+                    // Since we're adding a new profile (not the default), show delete button if needed
+                    const savedProfiles = getSavedProfiles();
+                    const deleteBtn = document.getElementById('deleteBusinessProfileBtn');
+                    if (savedProfiles.length > 1 && currentBusinessProfile !== 0) {
+                        deleteBtn.classList.remove('hidden');
+                    } else {
+                        deleteBtn.classList.add('hidden');
+                    }
                     return;
                 }
+            }
+        }
+
+        function removeBusinessProfile(index) {
+            if (confirm('Are you sure you want to remove this business profile?')) {
+                // Remove the profile and associated data
+                localStorage.removeItem(`businessProfile_${index}`);
+                localStorage.removeItem(`businessLetterhead_${index}`);
+                localStorage.removeItem(`lastInvoiceNumber_${index}`); // Remove associated invoice number
+
+                // If we're removing the current profile, switch to the first available profile
+                if (currentBusinessProfile === index) {
+                    const savedProfiles = getSavedProfiles();
+                    if (savedProfiles.length > 0) {
+                        // Switch to the first available profile
+                        switchToProfile(savedProfiles[0].index);
+                    } else {
+                        // If no other profiles exist, reset to a new empty profile
+                        currentBusinessProfile = 0;
+                        resetBusinessProfile();
+                        renderBusinessProfileTabs();
+                        updateAddBusinessButtonVisibility();
+                        // Hide delete button when only one profile exists
+                        document.getElementById('deleteBusinessProfileBtn').classList.add('hidden');
+                    }
+                } else {
+                    // Just re-render the tabs if we're not removing the current profile
+                    renderBusinessProfileTabs();
+                    updateAddBusinessButtonVisibility();
+                    // Update delete button visibility based on number of profiles and whether current profile is removable
+                    const remainingProfiles = getSavedProfiles();
+                    const deleteBtn = document.getElementById('deleteBusinessProfileBtn');
+                    if (remainingProfiles.length > 1 && currentBusinessProfile !== 0) {
+                        deleteBtn.classList.remove('hidden');
+                    } else {
+                        deleteBtn.classList.add('hidden');
+                    }
+                }
+            }
+        }
+
+        function resetBusinessProfile() {
+            businessNameInput.value = '';
+            yourNameInput.value = '';
+            phoneNumberInput.value = '';
+            businessAddressInput.value = '';
+
+            // Reset letterhead
+            letterheadPreview.classList.add('hidden');
+            letterheadUploadArea.classList.remove('hidden');
+            localStorage.removeItem(`businessLetterhead_${currentBusinessProfile}`);
+
+            updatePreview();
+
+            // Update delete button visibility after reset
+            const savedProfiles = getSavedProfiles();
+            const deleteBtn = document.getElementById('deleteBusinessProfileBtn');
+            if (savedProfiles.length > 1 && currentBusinessProfile !== 0) {
+                deleteBtn.classList.remove('hidden');
+            } else {
+                deleteBtn.classList.add('hidden');
+            }
+        }
+
+        function updateAddBusinessButtonVisibility() {
+            const savedProfiles = getSavedProfiles();
+            if (savedProfiles.length >= 4) {
+                addBusinessProfileBtn.classList.add('hidden');
+            } else {
+                addBusinessProfileBtn.classList.remove('hidden');
             }
         }
 
@@ -714,13 +833,47 @@
 
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    const imageData = event.target.result;
-                    letterheadPreview.src = imageData;
-                    letterheadPreview.classList.remove('hidden');
-                    letterheadUploadArea.classList.add('hidden');
-                    localStorage.setItem(`businessLetterhead_${currentBusinessProfile}`, imageData);
-                    saveBusinessProfile(currentBusinessProfile);
-                    updatePreview();
+                    const img = new Image();
+                    img.src = event.target.result;
+
+                    img.onload = function() {
+                        // Create a canvas to process the image with rounded corners
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+
+                        // Set canvas dimensions to match the image
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+
+                        // Draw image clipped to rounded rectangle
+                        ctx.beginPath();
+                        const radius = 10; // Corner radius for rounded edges
+                        ctx.moveTo(radius, 0);
+                        ctx.lineTo(img.width - radius, 0);
+                        ctx.quadraticCurveTo(img.width, 0, img.width, radius);
+                        ctx.lineTo(img.width, img.height - radius);
+                        ctx.quadraticCurveTo(img.width, img.height, img.width - radius, img.height);
+                        ctx.lineTo(radius, img.height);
+                        ctx.quadraticCurveTo(0, img.height, 0, img.height - radius);
+                        ctx.lineTo(0, radius);
+                        ctx.quadraticCurveTo(0, 0, radius, 0);
+                        ctx.closePath();
+                        ctx.clip();
+
+                        // Draw the image
+                        ctx.drawImage(img, 0, 0, img.width, img.height);
+
+                        // Convert canvas to data URL with rounded corners
+                        const roundedImageData = canvas.toDataURL('image/png');
+
+                        // Update the preview and save to storage
+                        letterheadPreview.src = roundedImageData;
+                        letterheadPreview.classList.remove('hidden');
+                        letterheadUploadArea.classList.add('hidden');
+                        localStorage.setItem(`businessLetterhead_${currentBusinessProfile}`, roundedImageData);
+                        saveBusinessProfile(currentBusinessProfile);
+                        updatePreview();
+                    };
                 };
                 reader.readAsDataURL(file);
             }
@@ -737,8 +890,9 @@ Please convert the following invoice details into JSON format. Use these field n
 - businessAddress (optional)
 - clientName (optional)
 - clientAddress (optional)
-- invoiceDate (optional, format: YYYY-MM-DD)
-- endDate (optional, format: YYYY-MM-DD)
+- invoiceDate (optional, format: YYYY-MM-DD, the date the invoice is sent)
+- workStartDate (optional, format: YYYY-MM-DD, the start date of work performed)
+- workEndDate (optional, format: YYYY-MM-DD, the end date of work performed)
 - services (optional, string with line breaks)
 - fee (optional, number)
 - notes (optional)
@@ -770,7 +924,8 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
                 if (data.clientName !== undefined) clientNameInput.value = data.clientName;
                 if (data.clientAddress !== undefined) clientAddressInput.value = data.clientAddress;
                 if (data.invoiceDate !== undefined) invoiceDateInput.value = data.invoiceDate;
-                if (data.endDate !== undefined) endDateInput.value = data.endDate;
+                if (data.workStartDate !== undefined) workStartDateInput.value = data.workStartDate;
+                if (data.workEndDate !== undefined) workEndDateInput.value = data.workEndDate;
                 if (data.services !== undefined) servicesInput.value = data.services;
                 if (data.fee !== undefined) feeInput.value = data.fee;
                 if (data.notes !== undefined) notesInput.value = data.notes;
@@ -834,17 +989,29 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
             }
             document.getElementById('invoiceNumberPreview').textContent = '#' + displayNumber;
 
-            // Dates
+            // Invoice date
             const dateSection = document.getElementById('previewDateSection');
             dateSection.style.display = invoiceDateInput.value ? 'block' : 'none';
             document.getElementById('previewInvoiceDate').textContent = formatDate(invoiceDateInput.value);
 
+            // Work period dates (service date section)
             const serviceDateSection = document.getElementById('previewServiceDateSection');
-            const hasServiceDate = invoiceDateInput.value;
-            serviceDateSection.style.display = hasServiceDate ? 'block' : 'none';
-            const serviceDate = formatDate(invoiceDateInput.value);
-            const endDate = formatDate(endDateInput.value);
-            document.getElementById('previewServiceDate').textContent = endDate ? `${serviceDate} - ${endDate}` : serviceDate;
+            const hasWorkDates = workStartDateInput.value || workEndDateInput.value;
+            serviceDateSection.style.display = hasWorkDates ? 'block' : 'none';
+
+            const workStartDate = formatDate(workStartDateInput.value);
+            const workEndDate = formatDate(workEndDateInput.value);
+
+            let serviceDateText = '';
+            if (workStartDate && workEndDate) {
+                serviceDateText = `${workStartDate} - ${workEndDate}`;
+            } else if (workStartDate) {
+                serviceDateText = `From ${workStartDate}`;
+            } else if (workEndDate) {
+                serviceDateText = `Until ${workEndDate}`;
+            }
+
+            document.getElementById('previewServiceDate').textContent = serviceDateText;
 
             // Services
             const servicesSection = document.getElementById('previewServicesSection');
@@ -889,7 +1056,11 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
                     img.src = savedLetterhead;
                     const imgWidth = 60;
                     const imgHeight = (img.height / img.width) * imgWidth;
+
+                    // For now, add the letterhead image normally without rounded corners
+                    // The canvas approach creates async issues with PDF generation
                     doc.addImage(savedLetterhead, 'PNG', (pageWidth - imgWidth) / 2, yPos, imgWidth, imgHeight);
+
                     yPos += imgHeight + 10;
                 } catch (e) {
                     console.error('Error adding letterhead to PDF:', e);
@@ -987,14 +1158,24 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
                 yPos += 10;
             }
 
-            // Service date
-            if (invoiceDateInput.value) {
+            // Work period
+            const hasWorkDates = workStartDateInput.value || workEndDateInput.value;
+            if (hasWorkDates) {
                 doc.setFontSize(10);
                 doc.setTextColor(107, 114, 128);
                 doc.setFont(undefined, 'bold');
-                const serviceDateText = endDateInput.value
-                    ? `SERVICE PERIOD: ${formatDate(invoiceDateInput.value)} - ${formatDate(endDateInput.value)}`
-                    : `SERVICE DATE: ${formatDate(invoiceDateInput.value)}`;
+                const workStartDate = formatDate(workStartDateInput.value);
+                const workEndDate = formatDate(workEndDateInput.value);
+
+                let serviceDateText = '';
+                if (workStartDate && workEndDate) {
+                    serviceDateText = `WORK PERIOD: ${workStartDate} - ${workEndDate}`;
+                } else if (workStartDate) {
+                    serviceDateText = `WORK START DATE: ${workStartDate}`;
+                } else if (workEndDate) {
+                    serviceDateText = `WORK END DATE: ${workEndDate}`;
+                }
+
                 doc.text(serviceDateText, col1, yPos);
                 yPos += 10;
             }
@@ -1054,12 +1235,12 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
             const fileName = `invoice_${fileNameBase.replace(/\s+/g, '_')}_${dateStr}.pdf`;
             doc.save(fileName);
 
-            // Update invoice number tracking
+            // Update invoice number tracking for current business
             const usedNumber = parseInvoiceNumber(invoiceNumberInput.value) ||
-                              parseInt(localStorage.getItem('lastInvoiceNumber') || '0', 10) + 1;
-            localStorage.setItem('lastInvoiceNumber', usedNumber.toString());
+                              parseInt(localStorage.getItem(`lastInvoiceNumber_${currentBusinessProfile}`) || '0', 10) + 1;
+            localStorage.setItem(`lastInvoiceNumber_${currentBusinessProfile}`, usedNumber.toString());
 
-            // Update placeholder for next invoice
+            // Update placeholder for next invoice for current business
             invoiceNumberInput.placeholder = formatInvoiceNumber(usedNumber + 1);
             invoiceNumberInput.value = '';
 
@@ -1076,17 +1257,19 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
         // Fill demo data
         function fillDemoData() {
             const today = new Date().toISOString().slice(0, 10);
+            const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-            clientNameInput.value = 'Acme Corporation';
-            clientAddressInput.value = '456 Business Rd\nSuite 700\nMetropolis, NY 10001';
+            clientNameInput.value = 'Pied Piper Solutions';
+            clientAddressInput.value = '123 Innovation Blvd\nTech Park, CA 94103';
 
             invoiceDateInput.value = today;
-            endDateInput.value = '';
+            workStartDateInput.value = today;
+            workEndDateInput.value = nextWeek;
 
-            servicesInput.value = 'Monthly Website Maintenance Package\n- Daily Backups & Security Scans\n- Plugin & Core Updates\n- 2 hours of development support';
+            servicesInput.value = 'Magical Code Transmutation Services\n- Converting coffee into functional software\n- Reality distortion field maintenance\n- Quantum bug hunting and extermination';
 
-            feeInput.value = '350.00';
-            notesInput.value = 'Thank you for your business! Payment is due upon receipt.';
+            feeInput.value = '1234.56';
+            notesInput.value = 'Note: Any existential crises caused by our reality-bending services are included at no extra cost.';
 
             updatePreview();
             invoicePreview.classList.remove('hidden');
@@ -1094,9 +1277,14 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
         }
 
         // Event listeners
+        // Get the add business button
+        const addBusinessProfileBtn = document.getElementById('addBusinessProfileBtn');
+        const deleteBusinessProfileBtn = document.getElementById('deleteBusinessProfileBtn');
+
         window.addEventListener('DOMContentLoaded', () => {
-            // Render business profile selector
-            renderBusinessProfileSelector();
+            // Render business profile tabs
+            renderBusinessProfileTabs();
+            updateAddBusinessButtonVisibility();
 
             // Load initial business profile
             loadBusinessProfile(0);
@@ -1106,9 +1294,28 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
                 invoiceDateInput.value = new Date().toISOString().slice(0, 10);
             }
 
-            // Load last invoice number
-            const lastInvoiceNumber = parseInt(localStorage.getItem('lastInvoiceNumber') || '0', 10);
+            // Load last invoice number for current business
+            const lastInvoiceNumber = parseInt(localStorage.getItem(`lastInvoiceNumber_${currentBusinessProfile}`) || '0', 10);
             invoiceNumberInput.placeholder = `INV-${(lastInvoiceNumber + 1).toString().padStart(3, '0')}`;
+
+            // Initialize import button in unselected state (ensure it looks unselected)
+            importModeButton.classList.remove('import-button-selected');
+
+            // Add event listener for the add business button
+            addBusinessProfileBtn.addEventListener('click', addNewBusinessProfile);
+
+            // Add event listener for the delete business button
+            deleteBusinessProfileBtn.addEventListener('click', function() {
+                removeBusinessProfile(currentBusinessProfile);
+            });
+
+            // Check if the first business profile (index 0) should have delete button hidden
+            const savedProfiles = getSavedProfiles();
+            if (savedProfiles.length <= 1 || currentBusinessProfile === 0) {
+                deleteBusinessProfileBtn.classList.add('hidden');
+            } else {
+                deleteBusinessProfileBtn.classList.remove('hidden');
+            }
 
             updatePreview();
             checkAutoCollapse();
@@ -1117,7 +1324,7 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
         const formInputs = [
             businessNameInput, yourNameInput, phoneNumberInput, businessAddressInput,
             invoiceNumberInput, clientNameInput, clientAddressInput,
-            invoiceDateInput, endDateInput, servicesInput, feeInput, notesInput
+            invoiceDateInput, workStartDateInput, workEndDateInput, servicesInput, feeInput, notesInput
         ];
 
         formInputs.forEach(input => {
@@ -1131,7 +1338,11 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
         });
 
         generateBtn.addEventListener('click', generatePDF);
-        fillDemoBtn.addEventListener('click', fillDemoData);
+        fillDemoBtn.addEventListener('click', function() {
+            if (confirm('Instafill will add witty sample data to all fields. Any existing data will be overwritten. Continue?')) {
+                fillDemoData();
+            }
+        });
     </script>
 </body>
 </html>
