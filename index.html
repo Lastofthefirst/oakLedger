@@ -1093,11 +1093,20 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
                 doc.text(noteLines, col1, yPos);
             }
 
-            // Save PDF
+            // Save PDF using a blob to prevent navigation issues in PWA
             const fileNameBase = clientNameInput.value || 'invoice';
             const dateStr = new Date().toISOString().slice(0, 10);
             const fileName = `invoice_${fileNameBase.replace(/\s+/g, '_')}_${dateStr}.pdf`;
-            doc.save(fileName);
+            
+            const pdfBlob = doc.output('blob');
+            const url = URL.createObjectURL(pdfBlob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
 
             // Update invoice number tracking for current business profile
             if (currentProfile) {
