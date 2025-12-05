@@ -504,7 +504,6 @@
         const { jsPDF } = window.jspdf;
 
         // Global state
-        let currentBusinessProfile = 0;
 
         // DOM Elements
         const importModeButton = document.getElementById('importModeButton');
@@ -575,77 +574,67 @@
             }
         });
 
-        // Check if we should auto-collapse on load
         function checkAutoCollapse() {
-            const profile = getBusinessProfile(currentBusinessProfile);
-            if (profile.businessName || profile.yourName) {
+            const profile = businessProfiles[currentProfileIndex];
+            if (profile && (profile.businessName || profile.yourName)) {
                 businessCollapsed = true;
                 businessContent.classList.add('hidden');
                 businessChevron.style.transform = 'rotate(-90deg)';
             }
         }
 
-        // Business Profile Management
-        function getBusinessProfile(index) {
-            const saved = localStorage.getItem(`businessProfile_${index}`);
-            return saved ? JSON.parse(saved) : {
+        // --- Business Profile Management (Refactored) ---
+
+        let businessProfiles = [];
+        let currentProfileIndex = 0;
+
+        function createEmptyProfile() {
+            return {
                 businessName: '',
                 yourName: '',
                 phoneNumber: '',
                 businessAddress: '',
-                letterhead: ''
+                lastInvoiceNumber: 0
             };
         }
 
-        function isProfileEmpty(profile) {
-            return !profile.businessName && !profile.yourName && !profile.phoneNumber &&
-                   !profile.businessAddress && !profile.letterhead;
+        function persistProfiles() {
+            localStorage.setItem('businessProfiles', JSON.stringify(businessProfiles));
         }
 
-        function getSavedProfiles() {
-            const profiles = [];
-            for (let i = 0; i < 4; i++) {
-                const profile = getBusinessProfile(i);
-                if (!isProfileEmpty(profile)) {
-                    profiles.push({ index: i, profile });
-                }
-            }
-            return profiles;
-        }
-
-        function saveBusinessProfile(index) {
-            const profile = {
-                businessName: businessNameInput.value,
-                yourName: yourNameInput.value,
-                phoneNumber: phoneNumberInput.value,
-                businessAddress: businessAddressInput.value,
-                letterhead: localStorage.getItem(`businessLetterhead_${index}`) || ''
-            };
-
-            // Only save if profile has content
-            if (!isProfileEmpty(profile)) {
-                localStorage.setItem(`businessProfile_${index}`, JSON.stringify(profile));
+        function loadProfiles() {
+            const savedProfiles = localStorage.getItem('businessProfiles');
+            if (savedProfiles && JSON.parse(savedProfiles).length > 0) {
+                businessProfiles = JSON.parse(savedProfiles);
             } else {
-                // Remove empty profile
-                localStorage.removeItem(`businessProfile_${index}`);
-                localStorage.removeItem(`businessLetterhead_${index}`);
+                businessProfiles = [createEmptyProfile()];
             }
+            currentProfileIndex = Math.min(Math.max(0, parseInt(localStorage.getItem('currentProfileIndex') || '0')), businessProfiles.length - 1);
+        }
 
+        function updateUiForProfileSwitch() {
+            loadProfileData(currentProfileIndex);
             renderBusinessProfileTabs();
-            updateAddBusinessButtonVisibility();
-
-            // Update delete button visibility based on number of profiles and whether current profile is removable
-            const savedProfiles = getSavedProfiles();
-            const deleteBtn = document.getElementById('deleteBusinessProfileBtn');
-            if (savedProfiles.length > 1 && currentBusinessProfile !== 0) {
-                deleteBtn.classList.remove('hidden');
-            } else {
-                deleteBtn.classList.add('hidden');
-            }
+            updateButtonVisibility();
+            updatePreview();
         }
 
-        function loadBusinessProfile(index) {
-            const profile = getBusinessProfile(index);
+        function saveCurrentProfileData() {
+            const profile = businessProfiles[currentProfileIndex];
+            if (!profile) return;
+
+            profile.businessName = businessNameInput.value;
+            profile.yourName = yourNameInput.value;
+            profile.phoneNumber = phoneNumberInput.value;
+            profile.businessAddress = businessAddressInput.value;
+            
+            persistProfiles();
+        }
+
+        function loadProfileData(index) {
+            const profile = businessProfiles[index];
+            if (!profile) return;
+
             businessNameInput.value = profile.businessName;
             yourNameInput.value = profile.yourName;
             phoneNumberInput.value = profile.phoneNumber;
@@ -661,163 +650,80 @@
                 letterheadUploadArea.classList.remove('hidden');
             }
 
-            // Update invoice number placeholder for this business
-            const lastInvoiceNumber = parseInt(localStorage.getItem(`lastInvoiceNumber_${index}`) || '0', 10);
+            const lastInvoiceNumber = profile.lastInvoiceNumber || 0;
             invoiceNumberInput.placeholder = `INV-${(lastInvoiceNumber + 1).toString().padStart(3, '0')}`;
-
-            updatePreview();
         }
-
+        
         function renderBusinessProfileTabs() {
             const tabsContainer = document.getElementById('businessProfileTabs');
-            const savedProfiles = getSavedProfiles();
-
-            // Clear existing tabs
             tabsContainer.innerHTML = '';
 
-            // Add tabs for saved profiles
-            savedProfiles.forEach(({ index, profile }) => {
-                const tabContainer = document.createElement('div');
-                tabContainer.className = 'flex items-center';
-
-                // Create tab button with tab-like styling
+            businessProfiles.forEach((profile, index) => {
                 const tabButton = document.createElement('button');
                 tabButton.type = 'button';
-                if (index === currentBusinessProfile) {
-                    // Active tab styling - higher and with top border
+                tabButton.textContent = profile.businessName || `Business ${index + 1}`;
+                tabButton.dataset.profileIndex = index;
+                
+                if (index === currentProfileIndex) {
                     tabButton.className = 'px-3 py-3 text-sm font-medium bg-white text-oak-900 border-t border-l border-r border-oak-400 rounded-t-lg shadow-sm z-10 -mb-1';
                 } else {
-                    // Inactive tab styling - lower with subtle border
                     tabButton.className = 'px-3 py-2 text-sm font-medium bg-oak-200 text-oak-700 hover:bg-oak-300 border border-oak-300 rounded-t-md';
                 }
-                tabButton.textContent = profile.businessName || `Business ${index + 1}`;
-                tabButton.dataset.profile = index;
-                tabButton.addEventListener('click', function() {
-                    switchToProfile(parseInt(this.dataset.profile));
+
+                tabButton.addEventListener('click', () => {
+                    if (currentProfileIndex !== index) {
+                        switchToProfile(index);
+                    }
                 });
 
-                tabContainer.appendChild(tabButton);
-                tabsContainer.appendChild(tabContainer);
+                tabsContainer.appendChild(tabButton);
             });
         }
 
         function switchToProfile(index) {
-            // Save current profile first
-            saveBusinessProfile(currentBusinessProfile);
-
-            // Update current profile
-            currentBusinessProfile = index;
-
-            // Load new profile
-            loadBusinessProfile(currentBusinessProfile);
-
-            // Re-render tabs to update active state
-            renderBusinessProfileTabs();
-
-            // Show/hide delete button based on whether there are multiple profiles and it's not the default profile
-            const savedProfiles = getSavedProfiles();
-            const deleteBtn = document.getElementById('deleteBusinessProfileBtn');
-            if (savedProfiles.length > 1 && currentBusinessProfile !== 0) {
-                deleteBtn.classList.remove('hidden');
-            } else {
-                deleteBtn.classList.add('hidden');
-            }
+            saveCurrentProfileData();
+            currentProfileIndex = index;
+            localStorage.setItem('currentProfileIndex', currentProfileIndex);
+            updateUiForProfileSwitch();
         }
 
         function addNewBusinessProfile() {
-            // Find first available slot
-            for (let i = 0; i < 4; i++) {
-                const profile = getBusinessProfile(i);
-                if (isProfileEmpty(profile)) {
-                    switchToProfile(i);
-                    // Since we're adding a new profile (not the default), show delete button if needed
-                    const savedProfiles = getSavedProfiles();
-                    const deleteBtn = document.getElementById('deleteBusinessProfileBtn');
-                    if (savedProfiles.length > 1 && currentBusinessProfile !== 0) {
-                        deleteBtn.classList.remove('hidden');
-                    } else {
-                        deleteBtn.classList.add('hidden');
-                    }
-                    return;
+            if (businessProfiles.length < 4) {
+                saveCurrentProfileData();
+                businessProfiles.push(createEmptyProfile());
+                persistProfiles();
+                switchToProfile(businessProfiles.length - 1);
+            }
+        }
+
+        function removeBusinessProfile() {
+            if (businessProfiles.length > 1) {
+                if (confirm('Are you sure you want to remove this business profile?')) {
+                    // Also remove associated separate data
+                    localStorage.removeItem(`businessLetterhead_${currentProfileIndex}`);
+                    
+                    businessProfiles.splice(currentProfileIndex, 1);
+                    persistProfiles();
+
+                    // Adjust current index if we removed the last profile in the list
+                    const newIndex = Math.min(currentProfileIndex, businessProfiles.length - 1);
+                    
+                    // No need to save here, just switch
+                    currentProfileIndex = newIndex;
+                    localStorage.setItem('currentProfileIndex', currentProfileIndex);
+                    updateUiForProfileSwitch();
                 }
             }
         }
 
-        function removeBusinessProfile(index) {
-            if (confirm('Are you sure you want to remove this business profile?')) {
-                // Remove the profile and associated data
-                localStorage.removeItem(`businessProfile_${index}`);
-                localStorage.removeItem(`businessLetterhead_${index}`);
-                localStorage.removeItem(`lastInvoiceNumber_${index}`); // Remove associated invoice number
-
-                // If we're removing the current profile, switch to the first available profile
-                if (currentBusinessProfile === index) {
-                    const savedProfiles = getSavedProfiles();
-                    if (savedProfiles.length > 0) {
-                        // Switch to the first available profile
-                        switchToProfile(savedProfiles[0].index);
-                    } else {
-                        // If no other profiles exist, reset to a new empty profile
-                        currentBusinessProfile = 0;
-                        resetBusinessProfile();
-                        renderBusinessProfileTabs();
-                        updateAddBusinessButtonVisibility();
-                        // Hide delete button when only one profile exists
-                        document.getElementById('deleteBusinessProfileBtn').classList.add('hidden');
-                    }
-                } else {
-                    // Just re-render the tabs if we're not removing the current profile
-                    renderBusinessProfileTabs();
-                    updateAddBusinessButtonVisibility();
-                    // Update delete button visibility based on number of profiles and whether current profile is removable
-                    const remainingProfiles = getSavedProfiles();
-                    const deleteBtn = document.getElementById('deleteBusinessProfileBtn');
-                    if (remainingProfiles.length > 1 && currentBusinessProfile !== 0) {
-                        deleteBtn.classList.remove('hidden');
-                    } else {
-                        deleteBtn.classList.add('hidden');
-                    }
-                }
-            }
+        function updateButtonVisibility() {
+            // Add button
+            addBusinessProfileBtn.style.display = businessProfiles.length < 4 ? 'flex' : 'none';
+            // Delete button
+            deleteBusinessProfileBtn.style.display = businessProfiles.length > 1 ? 'block' : 'none';
         }
 
-        function resetBusinessProfile() {
-            businessNameInput.value = '';
-            yourNameInput.value = '';
-            phoneNumberInput.value = '';
-            businessAddressInput.value = '';
-
-            // Reset letterhead
-            letterheadPreview.classList.add('hidden');
-            letterheadUploadArea.classList.remove('hidden');
-            localStorage.removeItem(`businessLetterhead_${currentBusinessProfile}`);
-
-            updatePreview();
-
-            // Update delete button visibility after reset
-            const savedProfiles = getSavedProfiles();
-            const deleteBtn = document.getElementById('deleteBusinessProfileBtn');
-            if (savedProfiles.length > 1 && currentBusinessProfile !== 0) {
-                deleteBtn.classList.remove('hidden');
-            } else {
-                deleteBtn.classList.add('hidden');
-            }
-        }
-
-        function updateAddBusinessButtonVisibility() {
-            const savedProfiles = getSavedProfiles();
-            if (savedProfiles.length >= 4) {
-                addBusinessProfileBtn.classList.add('hidden');
-            } else {
-                addBusinessProfileBtn.classList.remove('hidden');
-            }
-        }
-
-        // Auto-save business details on blur
-        businessNameInput.addEventListener('blur', () => saveBusinessProfile(currentBusinessProfile));
-        yourNameInput.addEventListener('blur', () => saveBusinessProfile(currentBusinessProfile));
-        phoneNumberInput.addEventListener('blur', () => saveBusinessProfile(currentBusinessProfile));
-        businessAddressInput.addEventListener('blur', () => saveBusinessProfile(currentBusinessProfile));
+        // --- End of Refactored Section ---
 
         // Letterhead handling
         letterheadUploadArea.addEventListener('click', () => letterheadInput.click());
@@ -825,58 +731,27 @@
 
         letterheadInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                if (file.size > 2 * 1024 * 1024) {
-                    alert('Image size should be less than 2MB');
-                    return;
-                }
+            if (!file || !file.type.startsWith('image/')) return;
 
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.src = event.target.result;
-
-                    img.onload = function() {
-                        // Create a canvas to process the image with rounded corners
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-
-                        // Set canvas dimensions to match the image
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-
-                        // Draw image clipped to rounded rectangle
-                        ctx.beginPath();
-                        const radius = 10; // Corner radius for rounded edges
-                        ctx.moveTo(radius, 0);
-                        ctx.lineTo(img.width - radius, 0);
-                        ctx.quadraticCurveTo(img.width, 0, img.width, radius);
-                        ctx.lineTo(img.width, img.height - radius);
-                        ctx.quadraticCurveTo(img.width, img.height, img.width - radius, img.height);
-                        ctx.lineTo(radius, img.height);
-                        ctx.quadraticCurveTo(0, img.height, 0, img.height - radius);
-                        ctx.lineTo(0, radius);
-                        ctx.quadraticCurveTo(0, 0, radius, 0);
-                        ctx.closePath();
-                        ctx.clip();
-
-                        // Draw the image
-                        ctx.drawImage(img, 0, 0, img.width, img.height);
-
-                        // Convert canvas to data URL with rounded corners
-                        const roundedImageData = canvas.toDataURL('image/png');
-
-                        // Update the preview and save to storage
-                        letterheadPreview.src = roundedImageData;
-                        letterheadPreview.classList.remove('hidden');
-                        letterheadUploadArea.classList.add('hidden');
-                        localStorage.setItem(`businessLetterhead_${currentBusinessProfile}`, roundedImageData);
-                        saveBusinessProfile(currentBusinessProfile);
-                        updatePreview();
-                    };
-                };
-                reader.readAsDataURL(file);
+            if (file.size > 2 * 1024 * 1024) {
+                alert('Image size should be less than 2MB');
+                return;
             }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const imgData = event.target.result;
+
+                // Save letterhead to its own localStorage item, indexed by the profile
+                localStorage.setItem(`businessLetterhead_${currentProfileIndex}`, imgData);
+                
+                // Update UI
+                letterheadPreview.src = imgData;
+                letterheadPreview.classList.remove('hidden');
+                letterheadUploadArea.classList.add('hidden');
+                updatePreview();
+            };
+            reader.readAsDataURL(file);
         });
 
         // LLM Prompt Helper
@@ -959,7 +834,6 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
             return `INV-${num.toString().padStart(3, '0')}`;
         }
 
-        // Update preview
         function updatePreview() {
             // From section
             const hasFrom = businessNameInput.value || yourNameInput.value || phoneNumberInput.value || businessAddressInput.value;
@@ -1031,7 +905,7 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
             // Letterhead
             const previewLetterhead = document.getElementById('previewLetterhead');
             const previewLetterheadImg = document.getElementById('previewLetterheadImg');
-            const savedLetterhead = localStorage.getItem(`businessLetterhead_${currentBusinessProfile}`);
+            const savedLetterhead = localStorage.getItem(`businessLetterhead_${currentProfileIndex}`);
             if (savedLetterhead) {
                 previewLetterheadImg.src = savedLetterhead;
                 previewLetterhead.classList.remove('hidden');
@@ -1040,27 +914,23 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
             }
         }
 
-        // Generate PDF
         function generatePDF() {
             const doc = new jsPDF();
             let yPos = 20;
             const pageWidth = doc.internal.pageSize.width;
             const col1 = 20;
             const col2 = pageWidth / 2 + 10;
+            const currentProfile = businessProfiles[currentProfileIndex];
 
             // Add letterhead if exists
-            const savedLetterhead = localStorage.getItem(`businessLetterhead_${currentBusinessProfile}`);
+            const savedLetterhead = localStorage.getItem(`businessLetterhead_${currentProfileIndex}`);
             if (savedLetterhead) {
                 try {
                     const img = new Image();
                     img.src = savedLetterhead;
                     const imgWidth = 60;
                     const imgHeight = (img.height / img.width) * imgWidth;
-
-                    // For now, add the letterhead image normally without rounded corners
-                    // The canvas approach creates async issues with PDF generation
                     doc.addImage(savedLetterhead, 'PNG', (pageWidth - imgWidth) / 2, yPos, imgWidth, imgHeight);
-
                     yPos += imgHeight + 10;
                 } catch (e) {
                     console.error('Error adding letterhead to PDF:', e);
@@ -1074,28 +944,22 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
             doc.text('INVOICE', 105, yPos, { align: 'center' });
             yPos += 12;
 
-            // Invoice number
-            let invoiceNum = invoiceNumberInput.value;
-            if (invoiceNum) {
-                const parsed = parseInvoiceNumber(invoiceNum);
-                if (parsed !== null) {
-                    invoiceNum = formatInvoiceNumber(parsed);
-                }
-            } else {
-                invoiceNum = invoiceNumberInput.placeholder;
-            }
-
+            // Determine invoice number
+            const lastInvoiceNum = currentProfile.lastInvoiceNumber || 0;
+            const enteredNum = parseInvoiceNumber(invoiceNumberInput.value);
+            const usedNumber = enteredNum !== null ? enteredNum : lastInvoiceNum + 1;
+            const invoiceNumStr = formatInvoiceNumber(usedNumber);
+            
             doc.setFontSize(11);
             doc.setTextColor(75, 85, 99);
             doc.setFont(undefined, 'normal');
 
             if (invoiceDateInput.value) {
-                doc.text(`#${invoiceNum} | ${formatDate(invoiceDateInput.value)}`, 105, yPos, { align: 'center' });
-                yPos += 20;
+                doc.text(`#${invoiceNumStr} | ${formatDate(invoiceDateInput.value)}`, 105, yPos, { align: 'center' });
             } else {
-                doc.text(`#${invoiceNum}`, 105, yPos, { align: 'center' });
-                yPos += 20;
+                doc.text(`#${invoiceNumStr}`, 105, yPos, { align: 'center' });
             }
+            yPos += 20;
 
             // From and To sections
             let fromYPos = yPos;
@@ -1235,12 +1099,13 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
             const fileName = `invoice_${fileNameBase.replace(/\s+/g, '_')}_${dateStr}.pdf`;
             doc.save(fileName);
 
-            // Update invoice number tracking for current business
-            const usedNumber = parseInvoiceNumber(invoiceNumberInput.value) ||
-                              parseInt(localStorage.getItem(`lastInvoiceNumber_${currentBusinessProfile}`) || '0', 10) + 1;
-            localStorage.setItem(`lastInvoiceNumber_${currentBusinessProfile}`, usedNumber.toString());
+            // Update invoice number tracking for current business profile
+            if (currentProfile) {
+                currentProfile.lastInvoiceNumber = usedNumber;
+                persistProfiles();
+            }
 
-            // Update placeholder for next invoice for current business
+            // Update placeholder for next invoice
             invoiceNumberInput.placeholder = formatInvoiceNumber(usedNumber + 1);
             invoiceNumberInput.value = '';
 
@@ -1276,71 +1141,66 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
             invoicePreview.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Event listeners
-        // Get the add business button
+        // --- Event Listeners and Initialization ---
+
+        // Get the add/remove buttons
         const addBusinessProfileBtn = document.getElementById('addBusinessProfileBtn');
         const deleteBusinessProfileBtn = document.getElementById('deleteBusinessProfileBtn');
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Render business profile tabs
-            renderBusinessProfileTabs();
-            updateAddBusinessButtonVisibility();
-
-            // Load initial business profile
-            loadBusinessProfile(0);
+            loadProfiles();
+            updateUiForProfileSwitch();
 
             // Set default invoice date
             if (!invoiceDateInput.value) {
                 invoiceDateInput.value = new Date().toISOString().slice(0, 10);
             }
 
-            // Load last invoice number for current business
-            const lastInvoiceNumber = parseInt(localStorage.getItem(`lastInvoiceNumber_${currentBusinessProfile}`) || '0', 10);
-            invoiceNumberInput.placeholder = `INV-${(lastInvoiceNumber + 1).toString().padStart(3, '0')}`;
-
-            // Initialize import button in unselected state (ensure it looks unselected)
+            // Initialize import button in unselected state
             importModeButton.classList.remove('import-button-selected');
+            
+            checkAutoCollapse();
 
-            // Add event listener for the add business button
-            addBusinessProfileBtn.addEventListener('click', addNewBusinessProfile);
+            // Re-add listeners for main actions
+            const formInputs = [
+                businessNameInput, yourNameInput, phoneNumberInput, businessAddressInput,
+                invoiceNumberInput, clientNameInput, clientAddressInput,
+                invoiceDateInput, workStartDateInput, workEndDateInput, servicesInput, feeInput, notesInput
+            ];
 
-            // Add event listener for the delete business button
-            deleteBusinessProfileBtn.addEventListener('click', function() {
-                removeBusinessProfile(currentBusinessProfile);
+            formInputs.forEach(input => {
+                input.addEventListener('input', updatePreview);
             });
 
-            // Check if the first business profile (index 0) should have delete button hidden
-            const savedProfiles = getSavedProfiles();
-            if (savedProfiles.length <= 1 || currentBusinessProfile === 0) {
-                deleteBusinessProfileBtn.classList.add('hidden');
-            } else {
-                deleteBusinessProfileBtn.classList.remove('hidden');
-            }
+            previewBtn.addEventListener('click', () => {
+                updatePreview();
+                invoicePreview.classList.remove('hidden');
+                invoicePreview.scrollIntoView({ behavior: 'smooth' });
+            });
 
-            updatePreview();
-            checkAutoCollapse();
+            generateBtn.addEventListener('click', generatePDF);
+            fillDemoBtn.addEventListener('click', function() {
+                if (confirm('Instafill will add witty sample data to all fields. Any existing data will be overwritten. Continue?')) {
+                    fillDemoData();
+                }
+            });
         });
 
-        const formInputs = [
-            businessNameInput, yourNameInput, phoneNumberInput, businessAddressInput,
-            invoiceNumberInput, clientNameInput, clientAddressInput,
-            invoiceDateInput, workStartDateInput, workEndDateInput, servicesInput, feeInput, notesInput
-        ];
+        // Add event listeners for the profile buttons
+        addBusinessProfileBtn.addEventListener('click', addNewBusinessProfile);
+        deleteBusinessProfileBtn.addEventListener('click', removeBusinessProfile);
 
-        formInputs.forEach(input => {
-            input.addEventListener('input', updatePreview);
+        // Auto-save business details on blur
+        const profileInputs = [businessNameInput, yourNameInput, phoneNumberInput, businessAddressInput];
+        profileInputs.forEach(input => {
+            input.addEventListener('blur', saveCurrentProfileData);
         });
 
-        previewBtn.addEventListener('click', () => {
-            updatePreview();
-            invoicePreview.classList.remove('hidden');
-            invoicePreview.scrollIntoView({ behavior: 'smooth' });
-        });
-
-        generateBtn.addEventListener('click', generatePDF);
-        fillDemoBtn.addEventListener('click', function() {
-            if (confirm('Instafill will add witty sample data to all fields. Any existing data will be overwritten. Continue?')) {
-                fillDemoData();
+        // Update business profile tab label when business name changes
+        businessNameInput.addEventListener('input', function() {
+            const tabButton = document.querySelector(`button[data-profile-index="${currentProfileIndex}"]`);
+            if (tabButton) {
+                tabButton.textContent = this.value || `Business ${currentProfileIndex + 1}`;
             }
         });
     </script>
