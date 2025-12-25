@@ -1021,17 +1021,17 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
             const today = new Date().toISOString().slice(0, 10);
             const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-            clientNameInput.value = 'Pied Piper Solutions';
-            clientAddressInput.value = '123 Innovation Blvd\nTech Park, CA 94103';
+            clientNameInput.value = 'DIY Dave';
+            clientAddressInput.value = '742 Evergreen Terrace\nSpringfield, USA 12345';
 
             invoiceDateInput.value = today;
             workStartDateInput.value = today;
             workEndDateInput.value = nextWeek;
 
-            servicesInput.value = 'Magical Code Transmutation Services\n- Converting coffee into functional software\n- Reality distortion field maintenance\n- Quantum bug hunting and extermination';
+            servicesInput.value = 'Emergency Plumbing Services\n- Undoing what you found on YouTube (2 hours)\n- Explaining why duct tape is not a permanent solution\n- Retrieving your phone from the toilet (no judgment)\n- Installing parts you bought at the hardware store that were "totally the same"\n- Weekend emergency rate for problems that started on Thursday';
 
-            feeInput.value = '1234.56';
-            notesInput.value = 'Note: Any existential crises caused by our reality-bending services are included at no extra cost.';
+            feeInput.value = '847.50';
+            notesInput.value = 'Payment due upon receipt. Next time, maybe don\'t wait until the water is ankle-deep to call. We accept cash, card, and sincere promises to never DIY plumbing again. Parts warranty void if you touch anything after we leave.';
 
             updatePreview();
             invoicePreview.classList.remove('hidden');
