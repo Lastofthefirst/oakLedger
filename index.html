@@ -39,7 +39,14 @@
                                 <p class="mt-2 text-sm font-semibold text-oak-700">Upload Letterhead</p>
                                 <p class="text-xs text-oak-500 mt-1">PNG, JPG, SVG up to 2MB</p>
                             </div>
-                            <img id="letterheadPreview" class="letterhead-preview hidden mt-3 mx-auto" alt="Letterhead">
+                            <div id="letterheadPreviewWrapper" class="hidden mt-3 relative mx-auto" style="width: fit-content;">
+                                <img id="letterheadPreview" class="letterhead-preview mx-auto cursor-pointer" alt="Letterhead" title="Tap to change or remove">
+                                <button id="removeLetterheadBtn" type="button" class="letterhead-remove-x" title="Remove image" style="display:none;">
+                                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <input type="file" id="letterheadInput" accept="image/*">
@@ -288,6 +295,47 @@
                 </div>
             </div>
 
+                <!-- Invoice History -->
+                <div id="invoiceHistorySection" class="hidden mb-8 card fade-in-up">
+                    <div class="card-header cursor-pointer" id="historyHeader">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-lg font-semibold text-oak-800">Invoice History</h2>
+                                <p class="mt-1 text-sm text-oak-500"><span id="historyCount">0</span> invoices recorded</p>
+                            </div>
+                            <svg id="historyChevron" class="chevron-icon h-5 w-5 text-oak-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div id="historyContent" class="hidden px-6 py-6">
+                        <div id="historyTableWrapper" class="overflow-x-auto mb-4" style="max-height: 300px; overflow-y: auto;">
+                            <table class="w-full text-sm text-left">
+                                <thead>
+                                    <tr class="text-xs font-bold text-oak-400 uppercase tracking-wide" style="letter-spacing: 0.05em;">
+                                        <th class="pb-3 pr-4">#</th>
+                                        <th class="pb-3 pr-4">Date</th>
+                                        <th class="pb-3 pr-4">Client</th>
+                                        <th class="pb-3 pr-4 text-right">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historyTableBody" class="text-oak-700"></tbody>
+                            </table>
+                        </div>
+                        <div class="flex gap-3">
+                            <button id="downloadCsvBtn" type="button" class="btn btn-secondary flex-1">
+                                <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Download CSV
+                            </button>
+                            <button id="clearHistoryBtn" type="button" class="btn btn-ghost px-4 text-red-600 hover:bg-red-50">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Preview Card -->
                 <div id="invoicePreview" class="hidden invoice-preview-card bg-white border border-oak-200 fade-in-up" style="margin-top: 3rem;">
                     <div class="invoice-preview-header" style="background: linear-gradient(135deg, var(--color-oak-700) 0%, var(--color-oak-900) 100%); padding: 1.5rem 2rem;">
@@ -529,12 +577,15 @@
             businessAddressInput.value = profile.businessAddress;
 
             const savedLetterhead = localStorage.getItem(`businessLetterhead_${index}`);
+            const previewWrapper = document.getElementById('letterheadPreviewWrapper');
+            const removeBtn = document.getElementById('removeLetterheadBtn');
+            removeBtn.style.display = 'none';
             if (savedLetterhead) {
                 letterheadPreview.src = savedLetterhead;
-                letterheadPreview.classList.remove('hidden');
+                previewWrapper.classList.remove('hidden');
                 letterheadUploadArea.classList.add('hidden');
             } else {
-                letterheadPreview.classList.add('hidden');
+                previewWrapper.classList.add('hidden');
                 letterheadUploadArea.classList.remove('hidden');
             }
 
@@ -615,7 +666,20 @@
 
         // Letterhead handling
         letterheadUploadArea.addEventListener('click', () => letterheadInput.click());
-        letterheadPreview.addEventListener('click', () => letterheadInput.click());
+
+        // Tap image to toggle the remove X
+        letterheadPreview.addEventListener('click', function(e) {
+            const removeBtn = document.getElementById('removeLetterheadBtn');
+            const isShowing = removeBtn.style.display !== 'none';
+            if (isShowing) {
+                removeBtn.style.display = 'none';
+            } else {
+                removeBtn.style.display = 'flex';
+                // Auto-hide after 3 seconds
+                clearTimeout(removeBtn._hideTimer);
+                removeBtn._hideTimer = setTimeout(() => { removeBtn.style.display = 'none'; }, 3000);
+            }
+        });
 
         letterheadInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
@@ -635,11 +699,25 @@
                 
                 // Update UI
                 letterheadPreview.src = imgData;
-                letterheadPreview.classList.remove('hidden');
+                document.getElementById('letterheadPreviewWrapper').classList.remove('hidden');
                 letterheadUploadArea.classList.add('hidden');
+                document.getElementById('removeLetterheadBtn').style.display = 'none';
                 updatePreview();
             };
             reader.readAsDataURL(file);
+        });
+
+        // Remove letterhead
+        document.getElementById('removeLetterheadBtn').addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (!confirm('Remove this letterhead image?')) return;
+            localStorage.removeItem(`businessLetterhead_${currentProfileIndex}`);
+            letterheadPreview.src = '';
+            document.getElementById('letterheadPreviewWrapper').classList.add('hidden');
+            letterheadUploadArea.classList.remove('hidden');
+            this.style.display = 'none';
+            letterheadInput.value = '';
+            updatePreview();
         });
 
         // LLM Prompt Helper
@@ -996,6 +1074,24 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
 
+            // Save invoice to history
+            saveInvoiceToHistory({
+                invoiceNumber: invoiceNumStr,
+                invoiceDate: invoiceDateInput.value,
+                clientName: clientNameInput.value,
+                clientAddress: clientAddressInput.value,
+                businessName: businessNameInput.value,
+                yourName: yourNameInput.value,
+                phoneNumber: phoneNumberInput.value,
+                businessAddress: businessAddressInput.value,
+                workStartDate: workStartDateInput.value,
+                workEndDate: workEndDateInput.value,
+                services: servicesInput.value,
+                fee: feeInput.value,
+                notes: notesInput.value,
+                createdAt: new Date().toISOString().slice(0, 19).replace('T', ' ')
+            });
+
             // Update invoice number tracking for current business profile
             if (currentProfile) {
                 currentProfile.lastInvoiceNumber = usedNumber;
@@ -1014,6 +1110,93 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
             }, 5000);
 
             updatePreview();
+        }
+
+        // --- Invoice History ---
+
+        function getInvoiceHistory() {
+            const saved = localStorage.getItem('invoiceHistory');
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function saveInvoiceToHistory(invoiceData) {
+            const history = getInvoiceHistory();
+            history.push(invoiceData);
+            localStorage.setItem('invoiceHistory', JSON.stringify(history));
+            renderInvoiceHistory();
+        }
+
+        function renderInvoiceHistory() {
+            const history = getInvoiceHistory();
+            const section = document.getElementById('invoiceHistorySection');
+            const tbody = document.getElementById('historyTableBody');
+            const countEl = document.getElementById('historyCount');
+
+            countEl.textContent = history.length;
+
+            if (history.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+
+            section.classList.remove('hidden');
+            tbody.innerHTML = '';
+
+            // Show newest first
+            [...history].reverse().forEach(inv => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-t border-oak-100';
+                tr.innerHTML = `
+                    <td class="py-2.5 pr-4 font-mono text-oak-600">${inv.invoiceNumber || '-'}</td>
+                    <td class="py-2.5 pr-4 whitespace-nowrap">${inv.invoiceDate ? formatDate(inv.invoiceDate) : inv.createdAt || '-'}</td>
+                    <td class="py-2.5 pr-4">${inv.clientName || '-'}</td>
+                    <td class="py-2.5 pr-4 text-right font-semibold">$${inv.fee ? parseFloat(inv.fee).toFixed(2) : '0.00'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function escapeCsvField(value) {
+            if (value == null) return '';
+            const str = String(value);
+            if (str.includes(',') || str.includes('"') || str.includes('\n') || str.includes('\r')) {
+                return '"' + str.replace(/"/g, '""') + '"';
+            }
+            return str;
+        }
+
+        function downloadInvoiceHistoryCsv() {
+            const history = getInvoiceHistory();
+            if (history.length === 0) return;
+
+            const headers = ['Invoice Number', 'Invoice Date', 'Client Name', 'Client Address', 'Business Name', 'Your Name', 'Phone', 'Business Address', 'Work Start', 'Work End', 'Services', 'Amount', 'Notes', 'Created'];
+            const rows = history.map(inv => [
+                inv.invoiceNumber,
+                inv.invoiceDate,
+                inv.clientName,
+                inv.clientAddress,
+                inv.businessName,
+                inv.yourName,
+                inv.phoneNumber,
+                inv.businessAddress,
+                inv.workStartDate,
+                inv.workEndDate,
+                inv.services,
+                inv.fee,
+                inv.notes,
+                inv.createdAt
+            ].map(escapeCsvField));
+
+            const csv = [headers.map(escapeCsvField).join(','), ...rows.map(r => r.join(','))].join('\r\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `oak-ledger-invoices_${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
 
         // Fill demo data
@@ -1057,6 +1240,32 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
             importModeButton.classList.remove('import-button-selected');
             
             checkAutoCollapse();
+
+            // Invoice history
+            renderInvoiceHistory();
+
+            let historyCollapsed = true;
+            document.getElementById('historyHeader').addEventListener('click', function() {
+                historyCollapsed = !historyCollapsed;
+                const content = document.getElementById('historyContent');
+                const chevron = document.getElementById('historyChevron');
+                if (historyCollapsed) {
+                    content.classList.add('hidden');
+                    chevron.classList.add('collapsed');
+                } else {
+                    content.classList.remove('hidden');
+                    chevron.classList.remove('collapsed');
+                }
+            });
+
+            document.getElementById('downloadCsvBtn').addEventListener('click', downloadInvoiceHistoryCsv);
+
+            document.getElementById('clearHistoryBtn').addEventListener('click', function() {
+                if (confirm('Clear all invoice history? This cannot be undone.')) {
+                    localStorage.removeItem('invoiceHistory');
+                    renderInvoiceHistory();
+                }
+            });
 
             // Re-add listeners for main actions
             const formInputs = [

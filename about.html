@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oak Ledger — About</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --oak-50: #FAF7F2;
+            --oak-100: #F5EDE0;
+            --oak-200: #E8D4B8;
+            --oak-300: #D4B896;
+            --oak-400: #B8956F;
+            --oak-500: #9A7B5A;
+            --oak-600: #7A5F42;
+            --oak-700: #5C4630;
+            --oak-800: #3E2F20;
+            --oak-900: #2B1F15;
+            --oak-950: #1C110A;
+            --gold: #C9A869;
+            --gold-light: #E6B85C;
+            --font-display: Georgia, 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+            --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            --font-mono: 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-body);
+            color: var(--oak-800);
+            line-height: 1.7;
+            background: var(--oak-50);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            opacity: 0.02;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            z-index: 0;
+        }
+
+        body > * { position: relative; z-index: 1; }
+
+        /* ==============================
+           ANIMATIONS
+           ============================== */
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(28px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes drawLine {
+            from { width: 0; }
+            to { width: 72px; }
+        }
+        @keyframes fadeNumber {
+            from { opacity: 0; transform: translateX(-12px); }
+            to { opacity: 0.08; transform: translateX(0); }
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .reveal.d1 { transition-delay: 0.08s; }
+        .reveal.d2 { transition-delay: 0.16s; }
+        .reveal.d3 { transition-delay: 0.24s; }
+
+        .hero-rise {
+            opacity: 0;
+            animation: rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .hero-rise.d1 { animation-delay: 0.1s; }
+        .hero-rise.d2 { animation-delay: 0.22s; }
+        .hero-rise.d3 { animation-delay: 0.36s; }
+        .hero-rise.d4 { animation-delay: 0.5s; }
+
+        /* ==============================
+           HERO
+           ============================== */
+
+        .hero {
+            background: linear-gradient(165deg, var(--oak-950) 0%, var(--oak-900) 35%, var(--oak-800) 100%);
+            color: var(--oak-50);
+            padding: 7rem 1.5rem 6rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140%;
+            height: 120%;
+            background: radial-gradient(ellipse at center, rgba(201, 168, 105, 0.1) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent 5%, var(--gold) 35%, var(--gold-light) 50%, var(--gold) 65%, transparent 95%);
+            opacity: 0.6;
+        }
+
+        .hero-inner { max-width: 640px; margin: 0 auto; position: relative; }
+
+        .hero-icon {
+            width: 44px; height: 44px;
+            margin: 0 auto 2rem;
+            color: var(--gold);
+            opacity: 0.8;
+        }
+
+        .hero h1 {
+            font-family: var(--font-display);
+            font-size: clamp(3rem, 7.5vw, 4.75rem);
+            font-weight: 700;
+            letter-spacing: -0.035em;
+            line-height: 0.95;
+            color: #fff;
+            text-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-rule {
+            height: 2px;
+            background: var(--gold);
+            border: none;
+            margin: 1.75rem auto;
+            animation: drawLine 0.9s 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            width: 0;
+            opacity: 0.6;
+        }
+
+        .hero-tagline {
+            font-size: 0.8125rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--oak-300);
+            font-weight: 600;
+        }
+
+        .hero-desc {
+            margin: 1.75rem auto 0;
+            font-size: 1.125rem;
+            color: var(--oak-200);
+            line-height: 1.75;
+            max-width: 500px;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.625rem;
+            margin-top: 2.75rem;
+            padding: 0.9375rem 2.5rem;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: var(--oak-950);
+            font-family: var(--font-body);
+            font-size: 0.9375rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-decoration: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 24px rgba(201, 168, 105, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+            transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .hero-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 36px rgba(201, 168, 105, 0.45), inset 0 1px 0 rgba(255,255,255,0.25);
+        }
+        .hero-cta svg { width: 18px; height: 18px; }
+
+        /* ==============================
+           GOLD DIVIDERS
+           ============================== */
+
+        .gold-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .gold-divider::before,
+        .gold-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            max-width: 120px;
+            background: var(--gold);
+            opacity: 0.3;
+        }
+
+        .gold-divider-dot {
+            width: 6px; height: 6px;
+            background: var(--gold);
+            opacity: 0.4;
+            transform: rotate(45deg);
+            margin: 0 1rem;
+            flex-shrink: 0;
+        }
+
+        /* ==============================
+           FEATURE SECTIONS
+           ============================== */
+
+        .feat {
+            padding: 5.5rem 1.5rem;
+            position: relative;
+        }
+
+        .feat--cream { background: var(--oak-50); }
+        .feat--white { background: #fff; }
+        .feat--dark {
+            background: linear-gradient(160deg, var(--oak-900) 0%, var(--oak-800) 100%);
+            color: var(--oak-200);
+        }
+        .feat--dark::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.025;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        .feat-inner {
+            max-width: 760px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 56px 1fr;
+            gap: 0 2.5rem;
+            position: relative;
+        }
+
+        .feat-number {
+            font-family: var(--font-display);
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1;
+            color: var(--oak-800);
+            opacity: 0.07;
+            grid-row: 1 / 3;
+            padding-top: 0.125rem;
+            user-select: none;
+        }
+        .feat--dark .feat-number { color: #fff; opacity: 0.06; }
+
+        .feat-header {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .feat-icon {
+            width: 40px; height: 40px;
+            padding: 8px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--oak-100), var(--oak-50));
+            border: 1px solid var(--oak-200);
+            color: var(--oak-600);
+            flex-shrink: 0;
+        }
+        .feat--dark .feat-icon {
+            background: linear-gradient(135deg, rgba(201,168,105,0.15), rgba(201,168,105,0.05));
+            border-color: rgba(201,168,105,0.2);
+            color: var(--gold);
+        }
+
+        .feat-title {
+            font-family: var(--font-display);
+            font-size: clamp(1.5rem, 3.5vw, 1.875rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            color: var(--oak-800);
+        }
+        .feat--dark .feat-title { color: #fff; }
+
+        .feat-body { grid-column: 2; }
+
+        .feat-desc {
+            font-size: 1.0625rem;
+            line-height: 1.75;
+            color: var(--oak-600);
+            margin-bottom: 1.5rem;
+        }
+        .feat--dark .feat-desc { color: var(--oak-300); }
+
+        .feat-doc {
+            padding: 1.25rem 1.5rem;
+            border-radius: 10px;
+            background: rgba(201, 168, 105, 0.06);
+            border: 1px solid rgba(201, 168, 105, 0.12);
+        }
+        .feat--dark .feat-doc {
+            background: rgba(255,255,255,0.04);
+            border-color: rgba(255,255,255,0.08);
+        }
+
+        .feat-doc-label {
+            font-size: 0.6875rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--oak-400);
+            margin-bottom: 0.75rem;
+        }
+        .feat--dark .feat-doc-label { color: var(--gold); opacity: 0.6; }
+
+        .feat-doc ul, .feat-doc ol {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .feat-doc li {
+            font-size: 0.9375rem;
+            line-height: 1.65;
+            color: var(--oak-600);
+            padding: 0.3rem 0;
+            padding-left: 1.25rem;
+            position: relative;
+        }
+        .feat--dark .feat-doc li { color: var(--oak-300); }
+
+        .feat-doc li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.7rem;
+            width: 5px; height: 5px;
+            border-radius: 50%;
+            background: var(--gold);
+            opacity: 0.5;
+        }
+
+        .feat-doc code {
+            display: inline;
+            background: rgba(201,168,105,0.1);
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.8125rem;
+            font-family: var(--font-mono);
+            color: var(--oak-700);
+        }
+        .feat--dark .feat-doc code {
+            background: rgba(255,255,255,0.08);
+            color: var(--gold-light);
+        }
+
+        /* Grouped features — two icons side by side */
+        .feat-icon-pair {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .feat-icon-pair .feat-icon { width: 36px; height: 36px; padding: 7px; }
+
+        @media (max-width: 640px) {
+            .feat { padding: 3.5rem 1.25rem; }
+            .feat-inner {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+            .feat-number {
+                font-size: 2.5rem;
+                grid-row: auto;
+                margin-bottom: 0.75rem;
+            }
+            .feat-body { grid-column: 1; }
+        }
+
+        /* ==============================
+           INSTALL TABS
+           ============================== */
+
+        .install-tabs {
+            display: flex;
+            gap: 0.25rem;
+            margin-top: 1.75rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .install-tab {
+            padding: 0.625rem 1.125rem;
+            font-size: 0.8125rem;
+            font-weight: 600;
+            letter-spacing: 0.015em;
+            background: rgba(201,168,105,0.06);
+            color: var(--oak-500);
+            border: 1px solid rgba(201,168,105,0.12);
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: var(--font-body);
+        }
+        .install-tab:hover { background: rgba(201,168,105,0.1); color: var(--oak-700); }
+        .install-tab.active {
+            background: rgba(201,168,105,0.1);
+            color: var(--oak-800);
+            border-color: rgba(201,168,105,0.2);
+        }
+
+        .install-panels {
+            background: rgba(201,168,105,0.05);
+            border: 1px solid rgba(201,168,105,0.12);
+            border-radius: 0 8px 8px 8px;
+            padding: 1.5rem;
+        }
+
+        .install-panel { display: none; }
+        .install-panel.active { display: block; }
+
+        .install-steps {
+            list-style: none;
+            counter-reset: step;
+            padding: 0;
+            margin: 0;
+        }
+
+        .install-steps li {
+            counter-increment: step;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.875rem;
+            padding: 0.625rem 0;
+            font-size: 0.9375rem;
+            line-height: 1.6;
+            color: var(--oak-600);
+        }
+        .install-steps li + li {
+            border-top: 1px solid rgba(201,168,105,0.08);
+        }
+
+        .install-steps li::before {
+            content: counter(step);
+            flex-shrink: 0;
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light));
+            color: var(--oak-900);
+            font-size: 0.6875rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 3px;
+        }
+
+        .install-steps code {
+            display: inline;
+            background: rgba(201,168,105,0.12);
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.8125rem;
+            font-family: var(--font-mono);
+            color: var(--oak-700);
+        }
+
+        @media (max-width: 480px) {
+            .install-tabs { flex-wrap: wrap; }
+            .install-panels { padding: 1.25rem; border-radius: 0 0 8px 8px; }
+        }
+
+        /* ==============================
+           PRIVACY
+           ============================== */
+
+        .privacy-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.5rem;
+            padding: 2rem;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            margin-top: 0.5rem;
+        }
+
+        .privacy-shield {
+            flex-shrink: 0;
+            width: 48px; height: 48px;
+            padding: 10px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(201,168,105,0.2), rgba(201,168,105,0.05));
+            border: 1px solid rgba(201,168,105,0.2);
+            color: var(--gold);
+        }
+
+        .privacy-card h3 {
+            font-family: var(--font-display);
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .privacy-card p {
+            font-size: 0.9375rem;
+            color: var(--oak-300);
+            line-height: 1.7;
+        }
+
+        @media (max-width: 480px) {
+            .privacy-card { flex-direction: column; gap: 1rem; padding: 1.5rem; }
+        }
+
+        /* ==============================
+           FOOTER
+           ============================== */
+
+        footer {
+            background: var(--oak-950);
+            color: var(--oak-400);
+            text-align: center;
+            padding: 3rem 1.5rem;
+        }
+
+        footer a {
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        footer a:hover { color: var(--gold-light); }
+
+        .footer-brand {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--oak-200);
+            margin-bottom: 0.375rem;
+        }
+
+        .footer-rule {
+            width: 36px; height: 1px;
+            background: var(--gold);
+            opacity: 0.25;
+            margin: 1.25rem auto;
+        }
+
+        .footer-built {
+            font-size: 0.8125rem;
+            color: var(--oak-500);
+        }
+
+        .footer-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            margin-top: 1.5rem;
+            font-size: 0.8125rem;
+            color: var(--oak-400);
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 8px;
+            transition: all 0.25s;
+        }
+        .footer-back:hover {
+            color: var(--gold);
+            border-color: rgba(201,168,105,0.2);
+            background: rgba(255,255,255,0.02);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== HERO ==================== -->
+    <header class="hero">
+        <div class="hero-inner">
+            <svg class="hero-icon hero-rise" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>
+            </svg>
+            <h1 class="hero-rise d1">Oak Ledger</h1>
+            <hr class="hero-rule">
+            <p class="hero-tagline hero-rise d2">Hassle-Free Invoice Generator</p>
+            <p class="hero-desc hero-rise d3">
+                A fast, private, offline-first invoice app that lives on your device.
+                No sign-ups. No subscriptions. Just invoices.
+            </p>
+            <a href="index.html" class="hero-cta hero-rise d4">
+                Open the App
+                <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+            </a>
+        </div>
+    </header>
+
+
+    <!-- ==================== 01 · OPTIONAL FIELDS ==================== -->
+    <section class="feat feat--cream">
+        <div class="feat-inner reveal">
+            <div class="feat-number">01</div>
+            <div class="feat-header">
+                <svg class="feat-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <h2 class="feat-title">Use only what you need</h2>
+            </div>
+            <div class="feat-body">
+                <p class="feat-desc">
+                    Every single field in Oak Ledger is optional. If something isn't relevant to your
+                    invoice&mdash;a client address, work dates, notes&mdash;just skip it. The invoice
+                    adapts to include only what you fill in, so you're never wrestling with blank fields
+                    or placeholder text.
+                </p>
+                <div class="feat-doc">
+                    <div class="feat-doc-label">How it works</div>
+                    <ul>
+                        <li>Leave any field empty and it won't appear on the PDF or the preview.</li>
+                        <li>The layout adjusts automatically&mdash;no awkward gaps or "N/A" placeholders.</li>
+                        <li>Need a simple invoice with just a client name and an amount? That's all you need to fill in.</li>
+                        <li>Running a detailed job with work periods, line-item services, and payment terms? Every field is there when you need it.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="gold-divider"><div class="gold-divider-dot"></div></div>
+
+
+    <!-- ==================== 02 · OFFLINE / PWA ==================== -->
+    <section class="feat feat--white">
+        <div class="feat-inner reveal">
+            <div class="feat-number">02</div>
+            <div class="feat-header">
+                <svg class="feat-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>
+                </svg>
+                <h2 class="feat-title">Works offline, installs like an app</h2>
+            </div>
+            <div class="feat-body">
+                <p class="feat-desc">
+                    Oak Ledger is a Progressive Web App. Visit it once and it caches everything you need
+                    to run offline&mdash;at a job site, on a plane, or when your connection drops. You
+                    don't even need to install it: just revisit the same URL in your browser without
+                    internet and it loads from cache. For the best experience, save it to your home
+                    screen and it launches full-screen, just like a native app.
+                </p>
+
+                <div class="install-tabs" role="tablist">
+                    <button class="install-tab active" data-tab="android" role="tab" aria-selected="true">Android</button>
+                    <button class="install-tab" data-tab="ios" role="tab" aria-selected="false">iPhone / iPad</button>
+                    <button class="install-tab" data-tab="desktop" role="tab" aria-selected="false">Desktop</button>
+                </div>
+
+                <div class="install-panels">
+                    <div class="install-panel active" id="panel-android">
+                        <ol class="install-steps">
+                            <li>Open Oak Ledger in <strong>Chrome</strong>.</li>
+                            <li>Tap the <code>&#8942;</code> menu (three dots, top-right).</li>
+                            <li>Tap <code>Install app</code> or <code>Add to Home screen</code>.</li>
+                            <li>Tap <code>Install</code> to confirm. The icon appears in your app drawer and home screen.</li>
+                            <li>Open it anytime&mdash;it works without an internet connection.</li>
+                        </ol>
+                    </div>
+                    <div class="install-panel" id="panel-ios">
+                        <ol class="install-steps">
+                            <li>Open Oak Ledger in <strong>Safari</strong> (required&mdash;other iOS browsers won't work for this).</li>
+                            <li>Tap the <strong>Share</strong> button (the square with an upward arrow, bottom of screen).</li>
+                            <li>Scroll down and tap <code>Add to Home Screen</code>.</li>
+                            <li>Confirm the name and tap <code>Add</code>.</li>
+                            <li>Open it from your home screen&mdash;it runs full-screen and works offline.</li>
+                        </ol>
+                    </div>
+                    <div class="install-panel" id="panel-desktop">
+                        <ol class="install-steps">
+                            <li>Open Oak Ledger in <strong>Chrome</strong>, <strong>Edge</strong>, or another Chromium browser.</li>
+                            <li>Look for the <strong>Install</strong> icon in the address bar (a small monitor with a down arrow), or check the browser menu.</li>
+                            <li>Click <code>Install Oak Ledger</code>.</li>
+                            <li>The app opens in its own window and appears in your desktop apps or start menu.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="gold-divider"><div class="gold-divider-dot"></div></div>
+
+
+    <!-- ==================== 03 · PDF ==================== -->
+    <section class="feat feat--cream">
+        <div class="feat-inner reveal">
+            <div class="feat-number">03</div>
+            <div class="feat-header">
+                <svg class="feat-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+                </svg>
+                <h2 class="feat-title">Professional PDFs in one tap</h2>
+            </div>
+            <div class="feat-body">
+                <p class="feat-desc">
+                    Hit <strong>Create PDF</strong> and a clean, formatted invoice downloads to your device
+                    immediately. The PDF includes your letterhead, business details, services breakdown,
+                    totals, and payment terms&mdash;ready to email or print.
+                </p>
+                <div class="feat-doc">
+                    <div class="feat-doc-label">Details</div>
+                    <ul>
+                        <li>PDFs are generated entirely on-device using jsPDF&mdash;nothing is sent to a server.</li>
+                        <li>The file name is generated automatically from the client name and date.</li>
+                        <li>Preview your invoice before downloading to check layout and content.</li>
+                        <li>The invoice number auto-increments after each PDF is created.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="gold-divider"><div class="gold-divider-dot"></div></div>
+
+
+    <!-- ==================== 04 · PROFILES & LETTERHEAD ==================== -->
+    <section class="feat feat--dark">
+        <div class="feat-inner reveal">
+            <div class="feat-number">04</div>
+            <div class="feat-header">
+                <div class="feat-icon-pair">
+                    <svg class="feat-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21"/>
+                    </svg>
+                    <svg class="feat-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M2.25 18V6a2.25 2.25 0 012.25-2.25h15A2.25 2.25 0 0121.75 6v12A2.25 2.25 0 0119.5 20.25H4.5A2.25 2.25 0 012.25 18z"/>
+                    </svg>
+                </div>
+                <h2 class="feat-title">Business profiles &amp; letterhead</h2>
+            </div>
+            <div class="feat-body">
+                <p class="feat-desc">
+                    Save your business name, contact info, and address once&mdash;they're remembered across
+                    invoices. Run multiple businesses or freelance under different names? Switch between
+                    up to four profiles with a single tap. Each profile keeps its own letterhead and
+                    invoice number sequence.
+                </p>
+                <div class="feat-doc">
+                    <div class="feat-doc-label">How to use</div>
+                    <ul>
+                        <li>Fill in your business details under <strong>Your Business Details</strong>&mdash;they auto-save when you leave each field.</li>
+                        <li>Tap the <strong>+</strong> button to add a new profile (up to 4). Switch between them using the tabs.</li>
+                        <li>Upload a letterhead image (PNG, JPG, or SVG, up to 2 MB) in the header area. It appears at the top of every PDF.</li>
+                        <li>To remove a letterhead, tap the image and then tap the <strong>&times;</strong> that appears.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="gold-divider"><div class="gold-divider-dot"></div></div>
+
+
+    <!-- ==================== 05 · NUMBERING ==================== -->
+    <section class="feat feat--white">
+        <div class="feat-inner reveal">
+            <div class="feat-number">05</div>
+            <div class="feat-header">
+                <svg class="feat-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 8.25h15m-16.5 7.5h15m-1.8-13.5l-3.9 19.5m-2.1-19.5l-3.9 19.5"/>
+                </svg>
+                <h2 class="feat-title">Automatic invoice numbering</h2>
+            </div>
+            <div class="feat-body">
+                <p class="feat-desc">
+                    Each business profile maintains its own invoice number sequence. After every PDF you create,
+                    the number increments automatically. Need to use a specific number instead? Just type it in
+                    and Oak Ledger will continue from there.
+                </p>
+                <div class="feat-doc">
+                    <div class="feat-doc-label">How it works</div>
+                    <ul>
+                        <li>The placeholder shows the next number in sequence (e.g. <code>INV-004</code>).</li>
+                        <li>Leave the field blank to use the auto-generated number.</li>
+                        <li>Type any number (e.g. <code>25</code> or <code>INV-025</code>) to override it. The sequence continues from your custom number.</li>
+                        <li>Each profile tracks its own sequence independently.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="gold-divider"><div class="gold-divider-dot"></div></div>
+
+
+    <!-- ==================== 06 · HISTORY & CSV ==================== -->
+    <section class="feat feat--cream">
+        <div class="feat-inner reveal">
+            <div class="feat-number">06</div>
+            <div class="feat-header">
+                <svg class="feat-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 14.25v2.25m3-4.5v4.5m3-6.75v6.75m3-9v9M6 20.25h12A2.25 2.25 0 0020.25 18V6A2.25 2.25 0 0018 3.75H6A2.25 2.25 0 003.75 6v12A2.25 2.25 0 006 20.25z"/>
+                </svg>
+                <h2 class="feat-title">Invoice history &amp; CSV export</h2>
+            </div>
+            <div class="feat-body">
+                <p class="feat-desc">
+                    Every invoice you generate is automatically recorded. The history section shows a summary
+                    table of all past invoices at a glance. When you need to reconcile, file taxes, or hand
+                    records to your accountant, download everything as a CSV.
+                </p>
+                <div class="feat-doc">
+                    <div class="feat-doc-label">How to use</div>
+                    <ul>
+                        <li>The <strong>Invoice History</strong> card appears automatically after your first invoice.</li>
+                        <li>Tap the header to expand it and see a table of all invoices (newest first).</li>
+                        <li>Tap <strong>Download CSV</strong> to export all recorded invoices with every field: invoice number, dates, client, services, amount, notes, and more.</li>
+                        <li>Use <strong>Clear</strong> to remove all history if you need a fresh start.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="gold-divider"><div class="gold-divider-dot"></div></div>
+
+
+    <!-- ==================== 07 · LLM IMPORT ==================== -->
+    <section class="feat feat--white">
+        <div class="feat-inner reveal">
+            <div class="feat-number">07</div>
+            <div class="feat-header">
+                <svg class="feat-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/>
+                </svg>
+                <h2 class="feat-title">LLM-assisted import</h2>
+            </div>
+            <div class="feat-body">
+                <p class="feat-desc">
+                    Have unstructured invoice details&mdash;an email, a text message, scribbled notes?
+                    Paste them in, copy a pre-built prompt for your favourite AI, and get back structured JSON
+                    that Oak Ledger can import in one click. The invoice populates itself and a PDF is generated
+                    immediately.
+                </p>
+                <div class="feat-doc">
+                    <div class="feat-doc-label">Step by step</div>
+                    <ul>
+                        <li>Tap <strong>Import</strong> in the top-right to enter import mode.</li>
+                        <li>Paste your raw invoice details into the <strong>LLM Assistant</strong> text box.</li>
+                        <li>Tap <strong>Copy LLM Prompt</strong> to get a formatted prompt on your clipboard.</li>
+                        <li>Paste the prompt into ChatGPT, Claude, or any LLM. It returns clean JSON.</li>
+                        <li>Paste the JSON into the <strong>Import Invoice Data</strong> box and tap <strong>Import &amp; Generate PDF</strong>.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="gold-divider"><div class="gold-divider-dot"></div></div>
+
+
+    <!-- ==================== PRIVACY ==================== -->
+    <section class="feat feat--dark" style="padding-bottom: 4rem;">
+        <div class="feat-inner reveal" style="display: block;">
+            <div class="feat-header" style="margin-bottom: 1.5rem;">
+                <svg class="feat-icon" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
+                </svg>
+                <h2 class="feat-title">Your invoices are private</h2>
+            </div>
+            <div class="privacy-card">
+                <svg class="privacy-shield" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                </svg>
+                <div>
+                    <h3>Your data lives on your device</h3>
+                    <p>
+                        All your invoice data&mdash;business profiles, letterheads, invoice
+                        history&mdash;is stored in your browser's local storage. Your invoices are
+                        private and never transmitted to any server. Clear your browser data and it's gone.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer>
+        <div class="footer-brand">Oak Ledger</div>
+        <p style="font-size: 0.8125rem; color: var(--oak-500);">Free &amp; open. Use it, share it.</p>
+        <div class="footer-rule"></div>
+        <p class="footer-built" style="margin-bottom: 0.75rem;">Built by</p>
+        <a href="https://ridvan.org" target="_blank" rel="noopener" style="display: inline-block; transition: all 0.3s; opacity: 1;">
+            <img src="ridvand.0ccc840f-opt-256.WEBP" alt="Ridvan" style="height: 48px; width: auto;">
+        </a>
+        <div style="margin-top: 1.5rem;">
+            <a href="index.html" class="footer-back">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+                Back to app
+            </a>
+        </div>
+    </footer>
+
+
+    <!-- ==================== SCRIPTS ==================== -->
+    <script>
+        // Install tabs
+        document.querySelectorAll('.install-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.install-tab').forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+                document.querySelectorAll('.install-panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                tab.setAttribute('aria-selected', 'true');
+                document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Scroll-triggered reveals
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('visible');
+                    obs.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+        document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    </script>
+</body>
+</html>
