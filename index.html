@@ -55,14 +55,26 @@
         </header>
 
         <main class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-            <!-- Import Mode Button -->
-            <div class="mb-8 flex items-center justify-end gap-3">
+            <!-- Toolbar -->
+            <div class="mb-8 flex items-center justify-end gap-2">
                 <button id="importModeButton" type="button" class="btn btn-ghost">
                     <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
                     Import
                 </button>
+                <button id="historyToggleBtn" type="button" class="btn btn-ghost hidden">
+                    <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    History
+                </button>
+                <a href="about.html" class="btn btn-ghost" title="About Oak Ledger">
+                    <svg class="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/>
+                    </svg>
+                    Help
+                </a>
             </div>
 
             <!-- Success Message -->
@@ -119,7 +131,7 @@
                             <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                             </svg>
-                            Import & Generate PDF
+                            Import Data
                         </button>
                     </div>
                 </div>
@@ -127,6 +139,57 @@
 
             <!-- Normal Mode Section -->
             <div id="normalSection">
+                <!-- Invoice History Card -->
+                <div id="invoiceHistorySection" class="hidden mb-8 card fade-in-up">
+                    <div class="card-header">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-lg font-semibold text-oak-800">Invoice History</h2>
+                                <p class="mt-1 text-sm text-oak-500"><span id="historyCount">0</span> invoices</p>
+                            </div>
+                            <button id="historyCloseBtn" type="button" class="p-1.5 rounded-lg text-oak-400 hover:text-oak-600 hover:bg-oak-100 transition-colors" title="Close">
+                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="historyProfileTabs" class="flex flex-wrap gap-1 mt-3"></div>
+                    </div>
+                    <div class="px-6 py-6">
+                        <div class="overflow-x-auto mb-4" style="max-height: 300px; overflow-y: auto;">
+                            <table class="w-full text-sm text-left">
+                                <thead>
+                                    <tr class="text-xs font-bold text-oak-400 uppercase tracking-wide" style="letter-spacing: 0.05em;">
+                                        <th class="pb-3 pr-4">#</th>
+                                        <th class="pb-3 pr-4">Date</th>
+                                        <th class="pb-3 pr-4">Client</th>
+                                        <th class="pb-3 pr-4 text-right">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="historyTableBody" class="text-oak-700"></tbody>
+                            </table>
+                        </div>
+                        <div class="flex gap-3 flex-wrap">
+                            <button id="downloadCsvBtn" type="button" class="btn btn-secondary flex-1">
+                                <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                </svg>
+                                Export CSV
+                            </button>
+                            <button id="importCsvBtn" type="button" class="btn btn-secondary flex-1">
+                                <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                </svg>
+                                Import CSV
+                            </button>
+                            <input type="file" id="csvFileInput" accept=".csv" style="display:none;">
+                            <button id="clearHistoryBtn" type="button" class="btn btn-ghost px-4 text-red-600 hover:bg-red-50">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Business Details Card -->
                 <div class="mb-8 card fade-in-up">
                     <div class="card-header cursor-pointer" id="businessHeader">
@@ -294,47 +357,6 @@
                     </button>
                 </div>
             </div>
-
-                <!-- Invoice History -->
-                <div id="invoiceHistorySection" class="hidden mb-8 card fade-in-up">
-                    <div class="card-header cursor-pointer" id="historyHeader">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h2 class="text-lg font-semibold text-oak-800">Invoice History</h2>
-                                <p class="mt-1 text-sm text-oak-500"><span id="historyCount">0</span> invoices recorded</p>
-                            </div>
-                            <svg id="historyChevron" class="chevron-icon h-5 w-5 text-oak-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </div>
-                    </div>
-                    <div id="historyContent" class="hidden px-6 py-6">
-                        <div id="historyTableWrapper" class="overflow-x-auto mb-4" style="max-height: 300px; overflow-y: auto;">
-                            <table class="w-full text-sm text-left">
-                                <thead>
-                                    <tr class="text-xs font-bold text-oak-400 uppercase tracking-wide" style="letter-spacing: 0.05em;">
-                                        <th class="pb-3 pr-4">#</th>
-                                        <th class="pb-3 pr-4">Date</th>
-                                        <th class="pb-3 pr-4">Client</th>
-                                        <th class="pb-3 pr-4 text-right">Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="historyTableBody" class="text-oak-700"></tbody>
-                            </table>
-                        </div>
-                        <div class="flex gap-3">
-                            <button id="downloadCsvBtn" type="button" class="btn btn-secondary flex-1">
-                                <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                Download CSV
-                            </button>
-                            <button id="clearHistoryBtn" type="button" class="btn btn-ghost px-4 text-red-600 hover:bg-red-50">
-                                Clear
-                            </button>
-                        </div>
-                    </div>
-                </div>
 
                 <!-- Preview Card -->
                 <div id="invoicePreview" class="hidden invoice-preview-card bg-white border border-oak-200 fade-in-up" style="margin-top: 3rem;">
@@ -553,6 +575,8 @@
             renderBusinessProfileTabs();
             updateButtonVisibility();
             updatePreview();
+            historyViewIndex = currentProfileIndex;
+            renderInvoiceHistory();
         }
 
         function saveCurrentProfileData() {
@@ -640,6 +664,7 @@
                 if (confirm('Are you sure you want to remove this business profile?')) {
                     // Also remove associated separate data
                     localStorage.removeItem(`businessLetterhead_${currentProfileIndex}`);
+                    localStorage.removeItem(getHistoryKey(currentProfileIndex));
                     
                     businessProfiles.splice(currentProfileIndex, 1);
                     persistProfiles();
@@ -772,8 +797,12 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
                 if (data.notes !== undefined) notesInput.value = data.notes;
                 if (data.invoiceNumber !== undefined) invoiceNumberInput.value = data.invoiceNumber;
 
-                // Generate PDF immediately
-                generatePDF();
+                // Switch back to normal mode so user can review/edit
+                isImportMode = false;
+                importSection.classList.add('hidden');
+                normalSection.classList.remove('hidden');
+                importModeButton.classList.remove('import-button-selected');
+                updatePreview();
             } catch (e) {
                 alert('Invalid JSON format. Please check your data and try again.\n\nError: ' + e.message);
             }
@@ -1112,37 +1141,92 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
             updatePreview();
         }
 
-        // --- Invoice History ---
+        // --- Invoice History (profile-specific with tabs) ---
 
-        function getInvoiceHistory() {
-            const saved = localStorage.getItem('invoiceHistory');
+        let historyViewIndex = 0; // which profile's history is currently displayed
+
+        function getHistoryKey(profileIndex) {
+            const idx = profileIndex !== undefined ? profileIndex : historyViewIndex;
+            return `invoiceHistory_${idx}`;
+        }
+
+        function getInvoiceHistory(profileIndex) {
+            const saved = localStorage.getItem(getHistoryKey(profileIndex));
             return saved ? JSON.parse(saved) : [];
         }
 
         function saveInvoiceToHistory(invoiceData) {
-            const history = getInvoiceHistory();
+            // Always save to the active business profile (not the viewed tab)
+            const history = getInvoiceHistory(currentProfileIndex);
             history.push(invoiceData);
-            localStorage.setItem('invoiceHistory', JSON.stringify(history));
+            localStorage.setItem(`invoiceHistory_${currentProfileIndex}`, JSON.stringify(history));
+            historyViewIndex = currentProfileIndex;
             renderInvoiceHistory();
         }
 
+        function migrateGlobalHistory() {
+            const globalHistory = localStorage.getItem('invoiceHistory');
+            if (globalHistory) {
+                const records = JSON.parse(globalHistory);
+                if (records.length > 0) {
+                    const existing = getInvoiceHistory(0);
+                    const merged = existing.concat(records);
+                    localStorage.setItem(`invoiceHistory_0`, JSON.stringify(merged));
+                }
+                localStorage.removeItem('invoiceHistory');
+            }
+        }
+
+        function hasAnyHistory() {
+            for (let i = 0; i < businessProfiles.length; i++) {
+                if (getInvoiceHistory(i).length > 0) return true;
+            }
+            return false;
+        }
+
         function renderInvoiceHistory() {
-            const history = getInvoiceHistory();
-            const section = document.getElementById('invoiceHistorySection');
+            const toggleBtn = document.getElementById('historyToggleBtn');
             const tbody = document.getElementById('historyTableBody');
             const countEl = document.getElementById('historyCount');
+            const tabsContainer = document.getElementById('historyProfileTabs');
 
+            // Show/hide the toolbar button based on whether any profile has history
+            if (!hasAnyHistory()) {
+                toggleBtn.classList.add('hidden');
+                document.getElementById('invoiceHistorySection').classList.add('hidden');
+                toggleBtn.classList.remove('import-button-selected');
+                return;
+            }
+            toggleBtn.classList.remove('hidden');
+
+            // Build profile tabs
+            tabsContainer.innerHTML = '';
+            businessProfiles.forEach((profile, index) => {
+                const count = getInvoiceHistory(index).length;
+                const tab = document.createElement('button');
+                tab.type = 'button';
+                tab.className = 'history-profile-tab' + (index === historyViewIndex ? ' active' : '');
+                const name = profile.businessName || `Business ${index + 1}`;
+                tab.innerHTML = `${name} <span class="history-tab-badge">${count}</span>`;
+                tab.addEventListener('click', () => {
+                    historyViewIndex = index;
+                    renderInvoiceHistory();
+                });
+                tabsContainer.appendChild(tab);
+            });
+
+            // Render the viewed profile's history
+            const history = getInvoiceHistory(historyViewIndex);
             countEl.textContent = history.length;
 
+            tbody.innerHTML = '';
             if (history.length === 0) {
-                section.classList.add('hidden');
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td colspan="4" class="py-6 text-center text-oak-400 text-sm">No invoices yet for this profile.</td>`;
+                tbody.appendChild(tr);
                 return;
             }
 
-            section.classList.remove('hidden');
-            tbody.innerHTML = '';
-
-            // Show newest first
             [...history].reverse().forEach(inv => {
                 const tr = document.createElement('tr');
                 tr.className = 'border-t border-oak-100';
@@ -1156,6 +1240,79 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
             });
         }
 
+        function parseCsvLine(line) {
+            const fields = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const ch = line[i];
+                if (inQuotes) {
+                    if (ch === '"' && i + 1 < line.length && line[i + 1] === '"') {
+                        current += '"';
+                        i++;
+                    } else if (ch === '"') {
+                        inQuotes = false;
+                    } else {
+                        current += ch;
+                    }
+                } else {
+                    if (ch === '"') {
+                        inQuotes = true;
+                    } else if (ch === ',') {
+                        fields.push(current);
+                        current = '';
+                    } else {
+                        current += ch;
+                    }
+                }
+            }
+            fields.push(current);
+            return fields;
+        }
+
+        function importCsvToHistory(csvText) {
+            const lines = csvText.split(/\r?\n/).filter(l => l.trim());
+            if (lines.length < 2) {
+                alert('CSV file is empty or has no data rows.');
+                return 0;
+            }
+
+            const headerLine = parseCsvLine(lines[0]);
+            const expectedHeaders = ['Invoice Number', 'Invoice Date', 'Client Name', 'Client Address', 'Business Name', 'Your Name', 'Phone', 'Business Address', 'Work Start', 'Work End', 'Services', 'Amount', 'Notes', 'Created'];
+            const fieldKeys = ['invoiceNumber', 'invoiceDate', 'clientName', 'clientAddress', 'businessName', 'yourName', 'phoneNumber', 'businessAddress', 'workStartDate', 'workEndDate', 'services', 'fee', 'notes', 'createdAt'];
+
+            // Validate headers match
+            const normalizeHeader = h => h.trim().toLowerCase();
+            const headersMatch = headerLine.length >= expectedHeaders.length &&
+                expectedHeaders.every((eh, i) => normalizeHeader(headerLine[i]) === normalizeHeader(eh));
+
+            if (!headersMatch) {
+                alert('CSV headers don\'t match the expected format.\n\nExpected: ' + expectedHeaders.join(', '));
+                return 0;
+            }
+
+            const history = getInvoiceHistory(historyViewIndex);
+            let imported = 0;
+
+            for (let i = 1; i < lines.length; i++) {
+                const fields = parseCsvLine(lines[i]);
+                if (fields.length < expectedHeaders.length) continue;
+
+                const record = {};
+                fieldKeys.forEach((key, idx) => {
+                    record[key] = fields[idx] || '';
+                });
+                history.push(record);
+                imported++;
+            }
+
+            if (imported > 0) {
+                localStorage.setItem(getHistoryKey(historyViewIndex), JSON.stringify(history));
+                renderInvoiceHistory();
+            }
+            return imported;
+        }
+
         function escapeCsvField(value) {
             if (value == null) return '';
             const str = String(value);
@@ -1166,7 +1323,7 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
         }
 
         function downloadInvoiceHistoryCsv() {
-            const history = getInvoiceHistory();
+            const history = getInvoiceHistory(historyViewIndex);
             if (history.length === 0) return;
 
             const headers = ['Invoice Number', 'Invoice Date', 'Client Name', 'Client Address', 'Business Name', 'Your Name', 'Phone', 'Business Address', 'Work Start', 'Work End', 'Services', 'Amount', 'Notes', 'Created'];
@@ -1192,7 +1349,9 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `oak-ledger-invoices_${new Date().toISOString().slice(0, 10)}.csv`;
+            const profile = businessProfiles[historyViewIndex];
+            const profileSlug = (profile && profile.businessName) ? profile.businessName.replace(/\s+/g, '_').toLowerCase() : `profile${historyViewIndex + 1}`;
+            a.download = `oak-ledger-${profileSlug}_${new Date().toISOString().slice(0, 10)}.csv`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -1241,30 +1400,65 @@ ${llmInput.value || '(No details provided - generate empty JSON template)'}`;
             
             checkAutoCollapse();
 
-            // Invoice history
+            // Migrate any old global history to profile 0
+            migrateGlobalHistory();
+
+            // Invoice history — default to current profile's tab
+            historyViewIndex = currentProfileIndex;
             renderInvoiceHistory();
 
-            let historyCollapsed = true;
-            document.getElementById('historyHeader').addEventListener('click', function() {
-                historyCollapsed = !historyCollapsed;
-                const content = document.getElementById('historyContent');
-                const chevron = document.getElementById('historyChevron');
-                if (historyCollapsed) {
-                    content.classList.add('hidden');
-                    chevron.classList.add('collapsed');
+            function toggleHistory() {
+                const section = document.getElementById('invoiceHistorySection');
+                const btn = document.getElementById('historyToggleBtn');
+                const isOpen = !section.classList.contains('hidden');
+                if (isOpen) {
+                    section.classList.add('hidden');
+                    btn.classList.remove('import-button-selected');
                 } else {
-                    content.classList.remove('hidden');
-                    chevron.classList.remove('collapsed');
+                    section.classList.remove('hidden');
+                    btn.classList.add('import-button-selected');
+                    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
-            });
+            }
+
+            document.getElementById('historyToggleBtn').addEventListener('click', toggleHistory);
+            document.getElementById('historyCloseBtn').addEventListener('click', toggleHistory);
 
             document.getElementById('downloadCsvBtn').addEventListener('click', downloadInvoiceHistoryCsv);
 
             document.getElementById('clearHistoryBtn').addEventListener('click', function() {
-                if (confirm('Clear all invoice history? This cannot be undone.')) {
-                    localStorage.removeItem('invoiceHistory');
+                const profile = businessProfiles[historyViewIndex];
+                const profileLabel = profile ? (profile.businessName || `Business ${historyViewIndex + 1}`) : 'this profile';
+                if (confirm(`Clear all invoice history for "${profileLabel}"? This cannot be undone.`)) {
+                    localStorage.removeItem(getHistoryKey(historyViewIndex));
                     renderInvoiceHistory();
+                    if (!hasAnyHistory()) {
+                        document.getElementById('historyToggleBtn').classList.remove('import-button-selected');
+                    }
                 }
+            });
+
+            // CSV Import
+            document.getElementById('importCsvBtn').addEventListener('click', function() {
+                document.getElementById('csvFileInput').click();
+            });
+
+            document.getElementById('csvFileInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const count = importCsvToHistory(event.target.result);
+                    if (count > 0) {
+                        const profile = businessProfiles[historyViewIndex];
+                        const profileLabel = profile ? (profile.businessName || `Business ${historyViewIndex + 1}`) : 'this profile';
+                        alert(`Imported ${count} invoice${count > 1 ? 's' : ''} into "${profileLabel}" history.`);
+                    }
+                };
+                reader.readAsText(file);
+                // Reset so re-selecting the same file fires change
+                e.target.value = '';
             });
 
             // Re-add listeners for main actions

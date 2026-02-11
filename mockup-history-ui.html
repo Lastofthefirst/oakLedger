@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice History UI Approaches — Mockup</title>
+    <style>
+        :root {
+            --oak-50: #FAF7F2;
+            --oak-100: #F0EAE0;
+            --oak-200: #DDD3C3;
+            --oak-300: #C5B49E;
+            --oak-400: #9A7B5A;
+            --oak-500: #8B6F47;
+            --oak-600: #6B4F2E;
+            --oak-700: #5A3E22;
+            --oak-800: #3E2723;
+            --oak-900: #2C1810;
+            --gold: #C9A869;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--oak-50);
+            color: var(--oak-900);
+            padding: 2rem 1rem;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-family: Georgia, serif;
+            font-size: 2rem;
+            color: var(--oak-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--oak-500);
+            font-size: 0.95rem;
+            margin-bottom: 3rem;
+        }
+
+        .approach {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid var(--oak-200);
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .approach-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .approach h2 {
+            font-family: Georgia, serif;
+            font-size: 1.4rem;
+            color: var(--oak-800);
+            margin-bottom: 0.75rem;
+        }
+
+        .approach p.desc {
+            color: var(--oak-500);
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.7;
+        }
+
+        .approach .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 500px) {
+            .approach .pros-cons { grid-template-columns: 1fr; }
+        }
+
+        .pros-cons h4 {
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+
+        .pros-cons ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .pros-cons ul li {
+            padding: 0.2rem 0;
+            color: var(--oak-600);
+        }
+
+        .pros-cons .pros h4 { color: #16a34a; }
+        .pros-cons .cons h4 { color: #dc2626; }
+
+        .pros-cons li::before {
+            margin-right: 0.4rem;
+            font-size: 0.8rem;
+        }
+
+        .pros li::before { content: "+"; color: #16a34a; font-weight: 700; }
+        .cons li::before { content: "-"; color: #dc2626; font-weight: 700; }
+
+        /* Mockup visuals */
+        .mockup {
+            background: var(--oak-50);
+            border: 1px solid var(--oak-200);
+            border-radius: 8px;
+            padding: 1.25rem;
+            font-size: 0.85rem;
+        }
+
+        .mockup .toolbar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .mockup .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.45rem 0.85rem;
+            border-radius: 8px;
+            border: 1px solid var(--oak-200);
+            background: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--oak-700);
+            cursor: default;
+        }
+
+        .mockup .btn.selected {
+            background: var(--oak-800);
+            color: var(--oak-50);
+            border-color: var(--oak-800);
+        }
+
+        .mockup .card {
+            background: white;
+            border: 1px solid var(--oak-200);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .mockup .card-header {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--oak-100);
+        }
+
+        .mockup .card-header h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--oak-800);
+        }
+
+        .mockup .card-header .meta {
+            font-size: 0.75rem;
+            color: var(--oak-400);
+            margin-top: 0.15rem;
+        }
+
+        .mockup .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 1rem;
+            border-top: 1px solid var(--oak-100);
+            font-size: 0.8rem;
+            color: var(--oak-600);
+        }
+
+        .mockup .row:first-child { border-top: none; }
+
+        .mockup .profile-tab {
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: default;
+            border: 1px solid var(--oak-200);
+            background: white;
+            color: var(--oak-600);
+        }
+
+        .mockup .profile-tab.active {
+            background: var(--oak-800);
+            color: white;
+            border-color: var(--oak-800);
+        }
+
+        .mockup .badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gold);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            width: 1.1rem;
+            height: 1.1rem;
+            border-radius: 50%;
+            margin-left: 0.3rem;
+        }
+
+        .separator {
+            text-align: center;
+            margin: 2rem 0;
+            font-size: 0.75rem;
+            color: var(--oak-300);
+            letter-spacing: 0.2em;
+        }
+
+        .recommended {
+            border: 2px solid var(--gold);
+        }
+
+        .recommended-tag {
+            display: inline-block;
+            background: var(--gold);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <h1>Profile-Specific History UI</h1>
+    <p class="subtitle">Three approaches for surfacing that invoice history is tied to the active business profile.</p>
+
+    <!-- ===== APPROACH A (Current / Implemented) ===== -->
+    <div class="approach recommended">
+        <div class="approach-label">Approach A</div>
+        <h2>Subtitle in Card Header <span class="recommended-tag">Implemented</span></h2>
+        <p class="desc">
+            The history card header includes a subtitle line showing the profile name and count:
+            <strong>"Acme Corp &mdash; 12 invoices"</strong>. When you switch profiles, the card updates
+            automatically. The toolbar History button toggles the card open/closed.
+        </p>
+
+        <div class="mockup">
+            <div class="toolbar">
+                <div class="btn">Import</div>
+                <div class="btn selected">History</div>
+                <div class="btn">Help</div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3>Invoice History</h3>
+                    <div class="meta"><strong>Acme Corp</strong> &mdash; 12 invoices</div>
+                </div>
+                <div class="row"><span>INV-012</span><span>Feb 10, 2026</span><span>Client X</span><span style="font-weight:600;">$500.00</span></div>
+                <div class="row"><span>INV-011</span><span>Jan 28, 2026</span><span>Client Y</span><span style="font-weight:600;">$1,200.00</span></div>
+                <div class="row"><span>INV-010</span><span>Jan 15, 2026</span><span>Client Z</span><span style="font-weight:600;">$300.00</span></div>
+            </div>
+        </div>
+
+        <div class="pros-cons" style="margin-top: 1.25rem;">
+            <div class="pros">
+                <h4>Pros</h4>
+                <ul>
+                    <li>Simple, clear, unobtrusive</li>
+                    <li>Already implemented</li>
+                    <li>Profile name always visible in card</li>
+                    <li>Auto-updates on profile switch</li>
+                </ul>
+            </div>
+            <div class="cons">
+                <h4>Cons</h4>
+                <ul>
+                    <li>Can't view other profiles without switching</li>
+                    <li>Subtle — could be missed</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="separator">&diamond; &diamond; &diamond;</div>
+
+    <!-- ===== APPROACH B ===== -->
+    <div class="approach">
+        <div class="approach-label">Approach B</div>
+        <h2>Tabs Inside the History Card</h2>
+        <p class="desc">
+            Profile tabs appear inside the history card itself, mirroring the business profile
+            tabs pattern. You can flip between profiles' histories without changing the active
+            business profile. Each tab shows the profile name and a count badge.
+        </p>
+
+        <div class="mockup">
+            <div class="toolbar">
+                <div class="btn">Import</div>
+                <div class="btn selected">History</div>
+                <div class="btn">Help</div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3>Invoice History</h3>
+                    <div style="display: flex; gap: 0.4rem; margin-top: 0.6rem;">
+                        <span class="profile-tab active">Acme Corp <span class="badge">12</span></span>
+                        <span class="profile-tab">Freelance <span class="badge">5</span></span>
+                        <span class="profile-tab">Side Biz <span class="badge">3</span></span>
+                    </div>
+                </div>
+                <div class="row"><span>INV-012</span><span>Feb 10, 2026</span><span>Client X</span><span style="font-weight:600;">$500.00</span></div>
+                <div class="row"><span>INV-011</span><span>Jan 28, 2026</span><span>Client Y</span><span style="font-weight:600;">$1,200.00</span></div>
+                <div class="row"><span>INV-010</span><span>Jan 15, 2026</span><span>Client Z</span><span style="font-weight:600;">$300.00</span></div>
+            </div>
+        </div>
+
+        <div class="pros-cons" style="margin-top: 1.25rem;">
+            <div class="pros">
+                <h4>Pros</h4>
+                <ul>
+                    <li>Browse all profiles' histories in one place</li>
+                    <li>Count badges give quick overview</li>
+                    <li>Familiar tab pattern (matches business tabs)</li>
+                </ul>
+            </div>
+            <div class="cons">
+                <h4>Cons</h4>
+                <ul>
+                    <li>More UI complexity in the history card</li>
+                    <li>Could be confusing: "am I switching profiles?"</li>
+                    <li>Export/Import/Clear need to be scoped carefully</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="separator">&diamond; &diamond; &diamond;</div>
+
+    <!-- ===== APPROACH C ===== -->
+    <div class="approach">
+        <div class="approach-label">Approach C</div>
+        <h2>Color-Coded Profile Indicator</h2>
+        <p class="desc">
+            A colored left border on the history card matches the active profile's assigned color.
+            The card header shows the profile name prominently. Each profile gets a distinct accent
+            (e.g., gold, teal, indigo, coral) that appears on both the business tab and the history card,
+            creating a visual link between the two.
+        </p>
+
+        <div class="mockup">
+            <div class="toolbar">
+                <div class="btn">Import</div>
+                <div class="btn selected">History</div>
+                <div class="btn">Help</div>
+            </div>
+            <div class="card" style="border-left: 4px solid var(--gold);">
+                <div class="card-header">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="width: 10px; height: 10px; border-radius: 50%; background: var(--gold); display: inline-block;"></span>
+                        <h3 style="margin: 0;">Acme Corp History</h3>
+                    </div>
+                    <div class="meta">12 invoices</div>
+                </div>
+                <div class="row"><span>INV-012</span><span>Feb 10, 2026</span><span>Client X</span><span style="font-weight:600;">$500.00</span></div>
+                <div class="row"><span>INV-011</span><span>Jan 28, 2026</span><span>Client Y</span><span style="font-weight:600;">$1,200.00</span></div>
+            </div>
+        </div>
+
+        <div class="pros-cons" style="margin-top: 1.25rem;">
+            <div class="pros">
+                <h4>Pros</h4>
+                <ul>
+                    <li>Instant visual association with the profile</li>
+                    <li>Elegant and distinctive</li>
+                    <li>Works even at a glance</li>
+                </ul>
+            </div>
+            <div class="cons">
+                <h4>Cons</h4>
+                <ul>
+                    <li>Requires assigning/managing colors per profile</li>
+                    <li>More design complexity (color system)</li>
+                    <li>Colors could clash with the oak palette</li>
+                    <li>Still can't view other profiles' history</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="separator">&diamond; &diamond; &diamond;</div>
+
+    <div style="text-align: center; padding: 2rem 0; color: var(--oak-400); font-size: 0.85rem;">
+        <p><strong>Approach A</strong> is currently implemented. Pick one if you'd like to upgrade, or keep as-is.</p>
+        <p style="margin-top: 0.5rem;"><a href="index.html" style="color: var(--gold); text-decoration: none; font-weight: 600;">Back to app</a></p>
+    </div>
+
+</div>
+</body>
+</html>
